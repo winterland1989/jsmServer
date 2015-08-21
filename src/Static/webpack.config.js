@@ -1,0 +1,20 @@
+module.exports = {
+    entry: {
+        index: "./index.coffee",
+        snippet: "./snippet.coffee"
+    },
+    output: {
+        path: __dirname,
+        filename: "[name].js"
+    },
+    module: {
+        loaders: [
+            { test: /\.css$/, loader: "style!css" },
+            { test: /\.coffee$/, loader: "coffee-loader" },
+            { test: /\.(coffee\.md|litcoffee)$/, loader: "coffee-loader?literate" }
+        ]
+    },
+    resolve: {
+        extensions: ["", ".coffee", ".js"]
+    }
+};
