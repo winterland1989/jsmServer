@@ -1818,14 +1818,19 @@
 
 
 /***/ },
-/* 5 */
+/* 5 */,
+/* 6 */,
+/* 7 */,
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var SimpleAutoComplete, m, s;
+	var SimpleAutoComplete, autoComplete, m, s, search, theme;
 
 	m = __webpack_require__(1);
 
 	s = __webpack_require__(3);
+
+	theme = __webpack_require__(4);
 
 	SimpleAutoComplete = (function() {
 	  function SimpleAutoComplete() {}
@@ -1855,25 +1860,6 @@
 	    })
 	  };
 	};
-
-	module.exports = SimpleAutoComplete;
-
-
-/***/ },
-/* 6 */,
-/* 7 */,
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var SimpleAutoComplete, autoComplete, m, s, search, theme;
-
-	m = __webpack_require__(1);
-
-	s = __webpack_require__(3);
-
-	theme = __webpack_require__(4);
-
-	SimpleAutoComplete = __webpack_require__(5);
 
 	autoComplete = new SimpleAutoComplete();
 

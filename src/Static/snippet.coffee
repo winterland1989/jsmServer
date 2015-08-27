@@ -40,7 +40,7 @@ onTextAreaChange = (e) -> commentText = e.target.value
 submitComment = (e) ->
     data = new FormData()
     data.append('sid', sid)
-    data.append('cotent', commentText)
+    data.append('content', commentText)
     m.request
         url: '/comment'
         method: 'POST'

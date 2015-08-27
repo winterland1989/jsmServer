@@ -61,17 +61,5 @@ data LoginInfo = LoginInfo {
     ,   _loginPassword :: Text
     } deriving (Show)
 
-data CommentInput = CommentInput {
-        _snippetId :: Text
-    ,   _content   :: Text
-    } deriving (Show)
-
-instance FromJSON CommentInput where
-    parseJSON (Object v) = CommentInput <$>
-                           v .: "sid" <*>
-                           v .: "content"
-    -- A non-Object value is of the wrong type, so fail.
-    parseJSON _          = mzero
-
 makeLenses ''LoginInfo
 

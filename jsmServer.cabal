@@ -49,6 +49,7 @@ executable jsmServer
                     ,   digestive-functors
                     ,   html-email-validate
                     ,   wai-extra
+                    ,   Spock
 
   ghc-options:     -Wall -O2 -threaded
   -- hs-source-dirs:      

@@ -64,6 +64,7 @@ searchRouter = [capture|/search|] . method GET . action $ do
 jsonRes :: JSON.ToJSON a => a -> ActionT ext prms IO ()
 jsonRes = lazyBytes . JSON.encode
 
+paramsToEnv :: Monad m => [P.Param] -> Path -> m [FormInput]
 paramsToEnv ((k, v):rest) p = do
     if  T.decodeUtf8 k == fromPath p
         then return [TextInput $ T.decodeUtf8 v]
@@ -116,25 +117,14 @@ userRouter = do
 commentRouter ::  Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
 commentRouter = do
     [capture|/comment|] $ do
-        method POST . action $ do
+        method POST . ([key|sid|] =: pInt64) . ([key|content|] =: pText) . action $ do
+            (sid, content) <- [params|sid, content|]
             getSession pText >>= \case
-                Just name -> do
-                    req <- getReqBodyParams
-                    liftIO $ print req
+                Just u -> do
+                    now <- liftIO getCurrentTime
+                    runSql . insert_ $ Comment (toSqlKey sid) u content now
                     stop
-                    {--
-                    case prms of
-                        Unknown bs -> liftIO $ print bs
-                        UrlEncoded a b -> liftIO $ print a >> print b
-                        Multipart a b c -> liftIO $ print a >> print b >> print c
-                    notFound404Api
-                    case (lookup "sid" prms, lookup "content" prms) of
-                        (Just sid, Just content)-> do
-                            now <- liftIO getCurrentTime
-                            liftIO $ print content
-                        _ -> notFound404Api
-                    --}
-                Nothing -> notFound404Api
+                Nothing -> redirect "/login"
 
         method GET . ([key|sid|] =: pInt64) .
             ([key|page|] =: pInt) .
