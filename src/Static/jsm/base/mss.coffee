@@ -70,9 +70,11 @@ parseR = (selectors, mss, indent, lineEnd) ->
             if typeof val is "object"
                 # for the spirit of list monad, let's expand!
                 subSelectors = parseSelectors key
-                newSelectors =
-                    ( "#{sel}#{subSel}" for sel in selectors for subSel in subSelectors )
-                subCssRule += parseR newSelectors, val, indent, lineEnd
+                newSelectors = do ->
+                    res = []
+                    res.push "#{sel}#{subSel}" for sel in selectors for subSel in subSelectors
+                    res
+                subCssRule += parseR(newSelectors, val, indent, lineEnd)
             else if val?
                 cssRule += "#{indent}#{parsePropName key}:#{val};#{lineEnd}"
 

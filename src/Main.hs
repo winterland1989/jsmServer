@@ -40,11 +40,15 @@ startServer :: Int -> FilePath -> IO ()
 startServer port dbfile = runApiaryWith (run port)
     (initLogger def
         +> initPersistPool (withSqlitePool (T.pack dbfile) 10) migrateAll
-        +> initClientSession pText def{csCookieSecure = True, csTTL = Just 3600}
+        +> initClientSession pText def{
+                csCookieName = "jsm_acess_sess"
+            ,   csCookieSecure = False
+            ,   csTTL = Just 3600
+            }
     )
     def $ do
-        webRouter
-        userApiRouter
-        snippetApiRouter
+        rootRouter
+        userRouter
+        snippetRouter
         commentRouter
         notFound404Router

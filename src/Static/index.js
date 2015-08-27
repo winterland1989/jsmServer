@@ -44,82 +44,39 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var SimpleAutoComplete, autoComplete, m, mss, s, topBar, topBarColor;
+	var m, s, theme;
+
+	__webpack_require__(8);
+
+	theme = __webpack_require__(4);
 
 	m = __webpack_require__(1);
 
 	s = __webpack_require__(3);
 
-	topBarColor = '#6cc';
-
-	SimpleAutoComplete = __webpack_require__(5);
-
-	autoComplete = new SimpleAutoComplete({
-	  lineHeight: '1.5em',
-	  fontSize: '1em',
-	  width: '480px',
-	  fontColor: '#fff',
-	  bgColor: topBarColor
-	});
-
-	topBar = {
-	  view: function() {
-	    return [m('.AutoCompleteWrapper', m('span.SearchLabel', 'search:'), autoComplete.view())];
-	  }
-	};
-
-	mss = function() {
-	  return {
-	    html_body: {
-	      fontSize: '14px'
+	s.tag({
+	  html_body: {
+	    fontSize: '14px'
+	  },
+	  '#introduction': {
+	    margin: '20px',
+	    h1: {
+	      fontSize: '2em'
 	    },
-	    '#topBar': s.PosRel()(s.ClearFix$({
-	      width: '100%',
-	      background: topBarColor,
-	      padding: '8px 0',
-	      '': s.merge(autoComplete.mss()),
-	      color: '#fff',
-	      SearchLabel: {
-	        lineHeight: '1.5em',
-	        fontSize: '1em',
-	        margin: '0 10px'
-	      }
-	    })),
-	    '#introduction': {
-	      margin: '20px',
-	      h1: {
-	        fontSize: '2em'
-	      },
-	      p: {
-	        fontSize: '1em'
-	      }
-	    },
-	    '#latestList': {
-	      margin: '20px',
-	      ul: {
-	        margin: '20px 0'
-	      },
-	      span: {
-	        margin: '0 4px'
-	      }
-	    },
-	    AutoCompleteWrapper: {
-	      float: 'left'
-	    },
-	    "#userinfo": {
-	      float: 'right',
-	      paddingRight: '4px',
-	      a: s.LineSize('1.5em', '1em')({
-	        color: '#fff',
-	        textDecoration: 'none'
-	      })
+	    p: {
+	      fontSize: '1em'
 	    }
-	  };
-	};
-
-	s.mount(mss);
-
-	m.mount(document.getElementById('searchDiv'), topBar);
+	  },
+	  '#latestList': {
+	    margin: '20px',
+	    ul: {
+	      margin: '20px 0'
+	    },
+	    span: {
+	      margin: '0 4px'
+	    }
+	  }
+	});
 
 
 /***/ },
@@ -1368,7 +1325,7 @@
 	};
 
 	parseR = function(selectors, mss, indent, lineEnd) {
-	  var cssRule, key, newSelectors, sel, subCssRule, subSel, subSelectors, val;
+	  var cssRule, key, newSelectors, subCssRule, subSelectors, val;
 	  cssRule = '';
 	  subCssRule = '';
 	  newSelectors = void 0;
@@ -1384,21 +1341,16 @@
 	      if (typeof val === "object") {
 	        subSelectors = parseSelectors(key);
 	        newSelectors = (function() {
-	          var j, len, results;
-	          results = [];
+	          var j, len, len1, m, res, sel, subSel;
+	          res = [];
 	          for (j = 0, len = subSelectors.length; j < len; j++) {
 	            subSel = subSelectors[j];
-	            results.push((function() {
-	              var len1, m, results1;
-	              results1 = [];
-	              for (m = 0, len1 = selectors.length; m < len1; m++) {
-	                sel = selectors[m];
-	                results1.push("" + sel + subSel);
-	              }
-	              return results1;
-	            })());
+	            for (m = 0, len1 = selectors.length; m < len1; m++) {
+	              sel = selectors[m];
+	              res.push("" + sel + subSel);
+	            }
 	          }
-	          return results;
+	          return res;
 	        })();
 	        subCssRule += parseR(newSelectors, val, indent, lineEnd);
 	      } else if (val != null) {
@@ -1857,7 +1809,15 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
 
 /***/ },
-/* 4 */,
+/* 4 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  mainColor: '#6cc'
+	};
+
+
+/***/ },
 /* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -1868,37 +1828,88 @@
 	s = __webpack_require__(3);
 
 	SimpleAutoComplete = (function() {
-	  function SimpleAutoComplete(arg) {
-	    this.lineHeight = arg.lineHeight, this.fontSize = arg.fontSize, this.fontColor = arg.fontColor, this.width = arg.width, this.bgColor = arg.bgColor;
-	  }
+	  function SimpleAutoComplete() {}
 
 	  SimpleAutoComplete.prototype.view = function() {
 	    return m('.SimpleAutoComplete', m('input'), m('.Suggetion'));
-	  };
-
-	  SimpleAutoComplete.prototype.mss = function() {
-	    return {
-	      SimpleAutoComplete: s.LineSize(this.lineHeight, this.fontSize)({
-	        display: 'inline-block',
-	        span_input: {
-	          margin: '0 4px'
-	        },
-	        input: {
-	          width: this.width,
-	          border: 'none',
-	          borderBottom: '1px solid #fff',
-	          background: this.bgColor,
-	          color: this.fontColor
-	        }
-	      })
-	    };
 	  };
 
 	  return SimpleAutoComplete;
 
 	})();
 
+	SimpleAutoComplete.mss = function(lineHeight, fontSize, width, fontColor, bgColor) {
+	  return {
+	    SimpleAutoComplete: s.LineSize(lineHeight, fontSize)({
+	      display: 'inline-block',
+	      span_input: {
+	        margin: '0 4px'
+	      },
+	      input: {
+	        width: width,
+	        border: 'none',
+	        borderBottom: '1px solid #fff',
+	        background: bgColor,
+	        color: fontColor
+	      }
+	    })
+	  };
+	};
+
 	module.exports = SimpleAutoComplete;
+
+
+/***/ },
+/* 6 */,
+/* 7 */,
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var SimpleAutoComplete, autoComplete, m, s, search, theme;
+
+	m = __webpack_require__(1);
+
+	s = __webpack_require__(3);
+
+	theme = __webpack_require__(4);
+
+	SimpleAutoComplete = __webpack_require__(5);
+
+	autoComplete = new SimpleAutoComplete();
+
+	search = {
+	  view: function() {
+	    return m('.AutoCompleteWrapper', m('span.SearchLabel', 'search:'), autoComplete.view());
+	  }
+	};
+
+	s.tag((function(lineHeight, fontSize, fontColor, bgColor) {
+	  return {
+	    '#topBar': s.PosRel()(s.ClearFix$({
+	      width: '100%',
+	      background: bgColor,
+	      color: fontColor,
+	      SearchLabel: s.LineSize(lineHeight, fontSize)({
+	        margin: '0 4px'
+	      }),
+	      '': SimpleAutoComplete.mss(lineHeight, fontSize, '480px', fontColor, bgColor)
+	    })),
+	    "#userinfo": {
+	      float: 'right',
+	      paddingRight: '4px',
+	      a: s.LineSize(lineHeight, fontSize)({
+	        color: fontColor,
+	        margin: '0 4px',
+	        textDecoration: 'none'
+	      })
+	    },
+	    AutoCompleteWrapper: {
+	      float: 'left'
+	    }
+	  };
+	})('40px', '1em', '#fff', theme.mainColor));
+
+	m.mount(document.getElementById('search'), search);
 
 
 /***/ }

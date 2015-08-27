@@ -5,14 +5,16 @@
 module Static where
 
 import           Data.FileEmbed
-import           Data.Text
-import           Data.Text.Encoding
+import           Data.Text          (Text)
+
+import qualified Data.Text          as T
+import qualified Data.Text.Encoding as T
 
 indexScript :: Text
-indexScript = decodeUtf8 $(embedFile "src/Static/index.js")
+indexScript = T.decodeUtf8 $(embedFile "src/Static/index.js")
 
 snippetScript :: Text
-snippetScript = decodeUtf8 $(embedFile "src/Static/snippet.js")
+snippetScript = T.decodeUtf8 $(embedFile "src/Static/snippet.js")
 
-normalizeStyle :: Text
-normalizeStyle = decodeUtf8 $(embedFile "src/Static/normalize.css")
+loginScript :: Text
+loginScript = T.decodeUtf8 $(embedFile "src/Static/login.js")

@@ -26,6 +26,7 @@ executable jsmServer
                     ,   apiary-session
                     ,   warp
                     ,   wai
+                    ,   http-types
                     ,   containers
                     ,   aeson
                     ,   cryptohash
@@ -34,6 +35,7 @@ executable jsmServer
                     ,   persistent-sqlite
                     ,   persistent-template
                     ,   esqueleto
+                    ,   lens-simple
                     ,   bytestring
                     ,   text
                     ,   time
@@ -46,6 +48,7 @@ executable jsmServer
                     ,   digestive-functors-lucid
                     ,   digestive-functors
                     ,   html-email-validate
+                    ,   wai-extra
 
   ghc-options:     -Wall -O2 -threaded
   -- hs-source-dirs:      

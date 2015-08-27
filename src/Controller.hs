@@ -5,9 +5,9 @@
 {-# LANGUAGE LambdaCase   #-}
 
 module Controller (
-    webRouter
-,   userApiRouter
-,   snippetApiRouter
+    rootRouter
+,   userRouter
+,   snippetRouter
 ,   commentRouter
 ,   notFound404Router
 ) where
@@ -27,8 +27,14 @@ import           Web.Apiary
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
+import Network.HTTP.Types.Header
 import           Crypto.Hash.SHA256 (hash)
-import           Text.Digestive (getForm)
+import           Text.Digestive (getForm, postForm)
+import Text.Digestive.Types
+import           Lens.Simple
+import  Data.Proxy
+import Data.Int
+import qualified Network.Wai.Parse as P
 
 notFound404Page :: ActionT ext prms IO ()
 notFound404Page = do
@@ -42,89 +48,126 @@ notFound404Api = status notFound404 >> stop
 notFound404Router :: Monad m => ApiaryT ext prms IO m ()
 notFound404Router = anyPath $ action notFound404Page
 
-webRouter :: Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
-webRouter = method GET $ do
+rootRouter :: Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
+rootRouter = root . method GET . action $ do
+    contentType "text/html"
+    ss <- runSql $ selectList [] [(LimitTo 20), Desc SnippetMtime]
+    u <- getSession pText
+    lazyBytes . renderBS . indexPage u
+        $ map (\(Entity _ snippet) -> snippet) ss
 
-    root . action $ do
-        contentType "text/html"
-        ss <- runSql $ selectList [] [(LimitTo 20), Desc SnippetMtime]
-        u <- getSession pText
-        lazyBytes . renderBS . indexPage u
-            $ map (\(Entity _ snippet) -> snippet) ss
+searchRouter :: Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
+searchRouter = [capture|/search|] . method GET . action $ do
+    contentType "text/html"
+    stop
 
-    [capture|/login|] . action $ do
-        contentType "text/html"
-        --lazyBytes $ renderBS loginPage
-        v <- getForm "test" userForm
-        lazyBytes . renderBS . userView $ fmap toHtml  v
+jsonRes :: JSON.ToJSON a => a -> ActionT ext prms IO ()
+jsonRes = lazyBytes . JSON.encode
 
-    [capture|/author::Text/title::Text/version::Int|] . action $ do
-        (author, title, version) <- [params|author, title, version|]
-        s <- runSql $ getBy (UniqueSnippet author title version)
-        case s of
-            Just (Entity _ snippet) -> do
+paramsToEnv ((k, v):rest) p = do
+    if  T.decodeUtf8 k == fromPath p
+        then return [TextInput $ T.decodeUtf8 v]
+        else paramsToEnv rest p
+paramsToEnv _ _ = fail "Parameter not found"
+
+userRouter :: Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
+userRouter = do
+
+    [capture|/login|] $ do
+        method GET . action $ do
+            contentType "text/html"
+            lform <- getForm "login" loginForm
+            rform <- getForm "register" registerForm
+            lazyBytes . renderBS $ loginPage lform rform
+
+        method POST . action $ do
+            userParams <- getReqBodyParams
+            (lform, linfo) <- postForm "login" loginForm (\_-> return $ paramsToEnv userParams)
+            case linfo of
+                Just i  -> do
+                    setSession pText $ i ^. loginName
+                    redirect "/"
+                Nothing -> do
+                    contentType "text/html"
+                    rform <- getForm "register" registerForm
+                    lazyBytes . renderBS $ loginPage lform rform
+
+    [capture|/register|] . method POST . action $ do
+        userParams <- getReqBodyParams
+        (rform, user) <- postForm "register" registerForm (\_-> return $ paramsToEnv userParams)
+        case user of
+            Just u -> do
+                _ <- runSql $ insert (over userPwdHash hash' u)
+                setSession pText $ u ^. userName
+                redirect "/"
+            Nothing -> do
                 contentType "text/html"
-                lazyBytes . renderBS $ snippetPage snippet
-            _ -> notFound404Page
+                lform <- getForm "login" loginForm
+                lazyBytes . renderBS $ loginPage lform rform
 
+    [capture|/logout|] . method GET . action $ deleteSession pText >> redirect "/"
 
-userApiRouter :: Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
-userApiRouter = method POST $ do
-
-    [capture|/user/check|] . action $
-        getSession pText >>= \case
-            Just name -> text name
-            _ -> notFound404Api
-
-    [capture|/user/login|] . userGuard . action $ do
-        (name, password) <- [params|name, password|]
-        (runSql . getBy $ UniqueUser name (hash' password)) >>= \case
-            Just _ -> setSession pText name
-            _ -> notFound404Api
-
-    [capture|/user/logout|] . action $ deleteSession pText
-
-    [capture|/user/register|] . userGuard .
-        ([key|desc|]  =: pText) . ([key|email|] =: pText) .
-        action $ do
-        (name, password, email, desc) <- [params|name, password, email, desc|]
-        u <- runSql $ insertUnique (User name (hash' password) email desc)
-        case u of
-            Just _ -> setSession pText name
-            _ -> notFound404Api
+    [capture|/home/user:pText|] .method GET . action $ do
+        stop
 
   where
-    userGuard = ([key|name|]  =: pText) . ([key|password|] =: pText)
     hash' = T.pack . show . hash . T.encodeUtf8
 
 commentRouter ::  Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
 commentRouter = do
     [capture|/comment|] $ do
-        method POST .  ([key|snippetId|] =: pString) . ([key|content|] =: pText) . action $ do
-            (snippetId, content) <- [params|snippetId, content|]
+        method POST . action $ do
             getSession pText >>= \case
                 Just name -> do
-                    _ <- runSql $ insert (Comment (read snippetId) name content)
+                    req <- getReqBodyParams
+                    liftIO $ print req
                     stop
-                _ -> notFound404Page
+                    {--
+                    case prms of
+                        Unknown bs -> liftIO $ print bs
+                        UrlEncoded a b -> liftIO $ print a >> print b
+                        Multipart a b c -> liftIO $ print a >> print b >> print c
+                    notFound404Api
+                    case (lookup "sid" prms, lookup "content" prms) of
+                        (Just sid, Just content)-> do
+                            now <- liftIO getCurrentTime
+                            liftIO $ print content
+                        _ -> notFound404Api
+                    --}
+                Nothing -> notFound404Api
 
-        method GET . ([key|snippetId|] =: pString) . action $ do
-            snippetId <- param [key|snippetId|]
-            stop
+        method GET . ([key|sid|] =: pInt64) .
+            ([key|page|] =: pInt) .
+            ([key|perPage|] =: pInt) .
+            action $ do
+            (sid, page, perPage) <- [params|sid, page, perPage|]
+            cmts <- runSql $ selectList [CommentSnippet ==. toSqlKey sid]
+                [Asc CommentMtime, LimitTo perPage, OffsetBy $ (page - 1) * perPage]
+            jsonRes cmts
+  where
+    pInt64 :: Proxy Int64
+    pInt64 = Proxy
 
-snippetApiRouter :: Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
-snippetApiRouter =
-    [capture|/api/author::Text/title::Text/version::Int|] $ do
+snippetRouter :: Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
+snippetRouter = do
+
+    [capture|/author::Text/title::Text/version::Int|] . method GET . action $ do
+        (author, title, version) <- [params|author, title, version|]
+        (runSql $ getBy (UniqueSnippet author title version)) >>= \case
+            Just (Entity sid snippet) -> do
+                u <- getSession pText
+                contentType "text/html"
+                lazyBytes . renderBS $ snippetPage u sid snippet
+            _ -> notFound404Page
+
+    [capture|/snippet/author::Text/title::Text/version::Int|] $ do
 
         method GET . action $ do
             (author, title, version) <- [params|author, title, version|]
-            s <- runSql $ getBy (UniqueSnippet author title version)
-
-            case s of
+            (runSql $ getBy (UniqueSnippet author title version)) >>= \case
                 Just (Entity sId snippet) -> do
                     runSql $ update sId [SnippetDownload +=. 1]
                     jsonRes snippet
-
                 _ -> notFound404Api
 
         method POST . action $ do
@@ -149,5 +192,3 @@ snippetApiRouter =
 
                 _ -> notFound404Api
 
-  where
-    jsonRes = lazyBytes . JSON.encode
