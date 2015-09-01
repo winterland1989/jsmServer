@@ -44,11 +44,9 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var m, s, theme;
+	var m, s;
 
 	__webpack_require__(8);
-
-	theme = __webpack_require__(4);
 
 	m = __webpack_require__(1);
 
@@ -1809,28 +1807,18 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
 
 /***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	module.exports = {
-	  mainColor: '#6cc'
-	};
-
-
-/***/ },
+/* 4 */,
 /* 5 */,
 /* 6 */,
 /* 7 */,
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var SimpleAutoComplete, autoComplete, m, s, search, theme;
+	var SimpleAutoComplete, autoComplete, m, s, search;
 
 	m = __webpack_require__(1);
 
 	s = __webpack_require__(3);
-
-	theme = __webpack_require__(4);
 
 	SimpleAutoComplete = (function() {
 	  function SimpleAutoComplete() {}
@@ -1880,7 +1868,13 @@
 	      }),
 	      '': SimpleAutoComplete.mss(lineHeight, fontSize, '480px', fontColor, bgColor)
 	    })),
-	    "#userinfo": {
+	    '#indexLink': s.LineSize('48px', '18px')({
+	      float: 'left',
+	      color: 'red',
+	      padding: '0 16px',
+	      textDecoration: 'none'
+	    }),
+	    '#userinfo': {
 	      float: 'right',
 	      paddingRight: '4px',
 	      a: s.LineSize(lineHeight, fontSize)({
@@ -1893,7 +1887,7 @@
 	      float: 'left'
 	    }
 	  };
-	})('40px', '1em', '#fff', theme.mainColor));
+	})('48px', '1em', '#fff', '#000'));
 
 	m.mount(document.getElementById('search'), search);
 

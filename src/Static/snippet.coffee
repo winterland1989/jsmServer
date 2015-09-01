@@ -1,10 +1,9 @@
 require './topBar'
-m = require "./jsm/base/mithril"
-theme = require "./theme"
+m = require './jsm/base/mithril'
 
-editor = ace.edit "editor"
-editor.setTheme "ace/theme/tomorrow"
-editor.getSession().setMode "ace/mode/javascript"
+editor = ace.edit 'editor'
+editor.setTheme 'ace/theme/tomorrow'
+editor.getSession().setMode 'ace/mode/javascript'
 
 
 commentInputDom = document.getElementById 'commentInput'
@@ -35,7 +34,7 @@ comment = view: ->
 
 m.mount (document.getElementById 'comment'), comment
 
-commentText = ""
+commentText = ''
 onTextAreaChange = (e) -> commentText = e.target.value
 submitComment = (e) ->
     data = new FormData()
@@ -67,27 +66,28 @@ s.tag
     html_body: s.Size('100%', '100%') s.PosRel(0,0)
         fontSize: '14px'
 
-    '#editor': s.PosAbs('40px', '400px', 0, 0) {}
+    '#editor': s.PosAbs('48px', '400px', 0, 0) {}
 
     '#sideBar': s.PosAbs('40px', 0, 0)
         width: '400px'
-        height: '100%'
         padding: 0
         border: 'none'
         overflowY: 'scroll'
 
-    "#snippetInfo_#commentInput_#comment":
-        margin: '10px'
-        paddingTop: '4px'
-        borderTop: '1px dashed ' + theme.mainColor
+    '#snippetInfo_#commentInput_#comment':
+        padding: '16px'
+        borderLeft: '1px dashed #000'
 
-    "#snippetInfo":
+    '#commentInput_#comment':
+        borderTop: '1px dashed #000'
+
+    '#snippetInfo':
         p:
             margin: '4px'
             fontSize: '1em'
             color: '#999'
 
-    "#commentInput":
+    '#commentInput':
         p_a:
             margin: '4px'
             fontSize: '1em'
@@ -101,14 +101,14 @@ s.tag
             margin: '4px 0'
             fontSize: '1em'
             border: 'none'
-            borderBottom: '1px solid ' + theme.mainColor
+            borderBottom: '1px solid #000'
             padding: '4px 0'
 
         CommentBtn: s.Size('100%', '24px')
             margin: '4px 0'
-            background: theme.mainColor
+            background: '#000'
             color: '#fff'
             border: 'none'
 
-    "#comment":
+    '#comment':
         ul: {}

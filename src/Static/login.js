@@ -44,11 +44,9 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var mss, s, theme;
+	var mss, s;
 
 	s = __webpack_require__(3);
-
-	theme = __webpack_require__(4);
 
 	mss = function() {
 	  return {
@@ -80,7 +78,7 @@
 	      },
 	      SubmitBtn: {
 	        color: '#fff',
-	        background: theme.mainColor,
+	        background: '#000',
 	        border: 'none',
 	        padding: '4px 0'
 	      }
@@ -654,15 +652,6 @@
 	}
 
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
-
-/***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	module.exports = {
-	  mainColor: '#6cc'
-	};
-
 
 /***/ }
 /******/ ]);

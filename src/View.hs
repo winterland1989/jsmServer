@@ -11,11 +11,13 @@ module View (
 ,   notFoundPage
 ) where
 
-import           Data.Foldable                    hiding (for_)
+import           Crypto.Hash
+import           Data.Foldable                    (forM_)
 import           Data.Monoid
-import          qualified Data.Text as T
-import          qualified Data.Text.Encoding as T
-import           Data.Text  (Text)
+import           Data.Text                        (Text)
+import qualified Data.Text                        as T
+import qualified Data.Text.Encoding               as T
+import qualified Data.ByteString as BS
 import           Data.Time.Clock                  ()
 import           Database.Persist.Sqlite
 import           Lucid
@@ -24,11 +26,10 @@ import           Static
 import           Text.Digestive
 import           Text.Digestive.Lucid.Html5
 import           Text.Html.Email.Validate
-import           Web.Apiary                       hiding (Html, text, string)
+import           Web.Apiary                       hiding (Html, string, text)
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
-import           Crypto.Hash.SHA256 (hash)
 
 textShow :: Show a => a -> Text
 textShow = T.pack . show
@@ -45,6 +46,7 @@ title' t = head_ $ do
 
 topBar :: SessionInfo -> Html ()
 topBar u = div_ [id_ "topBar"] $ do
+    a_ [id_ "indexLink", href_ "/"] "Jsm, a javascript snippet manager."
     div_ [id_ "search"] ""
     div_ [id_ "userinfo"] $ do
         case u of
@@ -60,7 +62,7 @@ indexPage u ss = doctypehtml_ . html_ $ do
     body_ $ do
         topBar u
         div_ [id_ "introduction"] $ do
-            h1_ "Welcome to jsm, the javascript snippet manager."
+            h1_ "Welcome to jsm, a javascript snippet manager."
             p_ "wip"
         ul_ [id_ "latestList"] $
             forM_ ss $ \(Snippet author title content language version revision mtime _) -> do
@@ -71,7 +73,7 @@ indexPage u ss = doctypehtml_ . html_ $ do
                         else span_ "revised"
                     a_ [href_ $  "/" <> author <> "/" <> title <> "/" <> textShow version] $ do
                         span_ $ toHtml title
-                        span_ . toHtml . show $ version
+                        span_ . toHtml . textShow $ version
                     span_ $ "@"
                     span_ . toHtml . show $ mtime
         script_ indexScript
@@ -80,7 +82,7 @@ indexPage u ss = doctypehtml_ . html_ $ do
 snippetPage :: SessionInfo -> SnippetId -> Snippet -> Html ()
 snippetPage u sid (Snippet author title content language version revision mtime download) =
     doctypehtml_ . html_ $ do
-        title' $ t
+        title' $ title <> textShow revision
         script_ [src_ "//cdn.jsdelivr.net/ace/1.2.0/min/ace.js"] ("" :: Text)
         body_ $ do
             topBar u
@@ -88,8 +90,9 @@ snippetPage u sid (Snippet author title content language version revision mtime 
             div_ [id_ "sideBar"] $ do
                 div_ [id_ "snippetInfo"] $ do
                     mapM_  (p_ . toHtml) [
-                            "Title:" <> t
+                            "Title:" <> title
                         ,   "Author: " <> author
+                        ,   "Version: " <> textShow version
                         ,   "Revision: " <> textShow revision
                         ,   "Mtime: " <> textShow mtime
                         ,   "Download: " <> textShow download
@@ -103,8 +106,6 @@ snippetPage u sid (Snippet author title content language version revision mtime 
                 div_ [id_ "comment"] ""
 
             script_ snippetScript
-  where
-    t = title <> textShow version
 
 registerForm :: Form Text (ActionT '[Session Text IO, Persist, Logger] prms IO) User
 registerForm = User
@@ -141,7 +142,9 @@ loginForm = checkM ("Wrong name/password" :: Text) loginCheck(
         <*> "password" .: (text Nothing)
     )
   where
-    hash' = T.pack . show . hash . T.encodeUtf8
+    md5 :: BS.ByteString -> Digest MD5
+    md5 = hash
+    hash' = T.decodeUtf8 . digestToHexByteString . md5 . T.encodeUtf8
     loginCheck (LoginInfo name password) =
         (runSql . getBy $ UniqueUser name (hash' password)) >>= \case
             Just _ -> return True

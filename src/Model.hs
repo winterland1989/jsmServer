@@ -12,8 +12,6 @@
 
 module Model where
 
-import           Control.Monad
-import           Data.Aeson
 import           Data.Text
 import           Data.Time.Clock
 import           Database.Persist.TH
@@ -44,6 +42,7 @@ Snippet json
 SearchMap
     keyword Text
     snippet SnippetId
+    UniqueSearchMap keyword snippet
     deriving Show
 
 Comment json

@@ -44,19 +44,17 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var comment, commentArray, commentForm, commentFormDom, commentInputDom, commentLoading, commentText, editor, m, onTextAreaChange, s, sid, submitComment, theme;
+	var comment, commentArray, commentForm, commentFormDom, commentInputDom, commentLoading, commentText, editor, m, onTextAreaChange, s, sid, submitComment;
 
 	__webpack_require__(8);
 
 	m = __webpack_require__(1);
 
-	theme = __webpack_require__(4);
+	editor = ace.edit('editor');
 
-	editor = ace.edit("editor");
+	editor.setTheme('ace/theme/tomorrow');
 
-	editor.setTheme("ace/theme/tomorrow");
-
-	editor.getSession().setMode("ace/mode/javascript");
+	editor.getSession().setMode('ace/mode/javascript');
 
 	commentInputDom = document.getElementById('commentInput');
 
@@ -100,7 +98,7 @@
 
 	m.mount(document.getElementById('comment'), comment);
 
-	commentText = "";
+	commentText = '';
 
 	onTextAreaChange = function(e) {
 	  return commentText = e.target.value;
@@ -147,27 +145,28 @@
 	  html_body: s.Size('100%', '100%')(s.PosRel(0, 0)({
 	    fontSize: '14px'
 	  })),
-	  '#editor': s.PosAbs('40px', '400px', 0, 0)({}),
+	  '#editor': s.PosAbs('48px', '400px', 0, 0)({}),
 	  '#sideBar': s.PosAbs('40px', 0, 0)({
 	    width: '400px',
-	    height: '100%',
 	    padding: 0,
 	    border: 'none',
 	    overflowY: 'scroll'
 	  }),
-	  "#snippetInfo_#commentInput_#comment": {
-	    margin: '10px',
-	    paddingTop: '4px',
-	    borderTop: '1px dashed ' + theme.mainColor
+	  '#snippetInfo_#commentInput_#comment': {
+	    padding: '16px',
+	    borderLeft: '1px dashed #000'
 	  },
-	  "#snippetInfo": {
+	  '#commentInput_#comment': {
+	    borderTop: '1px dashed #000'
+	  },
+	  '#snippetInfo': {
 	    p: {
 	      margin: '4px',
 	      fontSize: '1em',
 	      color: '#999'
 	    }
 	  },
-	  "#commentInput": {
+	  '#commentInput': {
 	    p_a: {
 	      margin: '4px',
 	      fontSize: '1em',
@@ -181,17 +180,17 @@
 	      margin: '4px 0',
 	      fontSize: '1em',
 	      border: 'none',
-	      borderBottom: '1px solid ' + theme.mainColor,
+	      borderBottom: '1px solid #000',
 	      padding: '4px 0'
 	    }),
 	    CommentBtn: s.Size('100%', '24px')({
 	      margin: '4px 0',
-	      background: theme.mainColor,
+	      background: '#000',
 	      color: '#fff',
 	      border: 'none'
 	    })
 	  },
-	  "#comment": {
+	  '#comment': {
 	    ul: {}
 	  }
 	});
@@ -1927,28 +1926,18 @@
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
 
 /***/ },
-/* 4 */
-/***/ function(module, exports) {
-
-	module.exports = {
-	  mainColor: '#6cc'
-	};
-
-
-/***/ },
+/* 4 */,
 /* 5 */,
 /* 6 */,
 /* 7 */,
 /* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var SimpleAutoComplete, autoComplete, m, s, search, theme;
+	var SimpleAutoComplete, autoComplete, m, s, search;
 
 	m = __webpack_require__(1);
 
 	s = __webpack_require__(3);
-
-	theme = __webpack_require__(4);
 
 	SimpleAutoComplete = (function() {
 	  function SimpleAutoComplete() {}
@@ -1998,7 +1987,13 @@
 	      }),
 	      '': SimpleAutoComplete.mss(lineHeight, fontSize, '480px', fontColor, bgColor)
 	    })),
-	    "#userinfo": {
+	    '#indexLink': s.LineSize('48px', '18px')({
+	      float: 'left',
+	      color: 'red',
+	      padding: '0 16px',
+	      textDecoration: 'none'
+	    }),
+	    '#userinfo': {
 	      float: 'right',
 	      paddingRight: '4px',
 	      a: s.LineSize(lineHeight, fontSize)({
@@ -2011,7 +2006,7 @@
 	      float: 'left'
 	    }
 	  };
-	})('40px', '1em', '#fff', theme.mainColor));
+	})('48px', '1em', '#fff', '#000'));
 
 	m.mount(document.getElementById('search'), search);
 

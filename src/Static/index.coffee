@@ -1,5 +1,4 @@
 require './topBar'
-theme = require "./theme"
 
 m = require "./jsm/base/mithril"
 s = require './jsm/base/mss'

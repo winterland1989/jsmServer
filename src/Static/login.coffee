@@ -1,5 +1,4 @@
 s = require "./jsm/base/mss"
-theme = require "./theme"
 
 mss = ->
     html_body:
@@ -29,7 +28,7 @@ mss = ->
 
         SubmitBtn:
             color: '#fff'
-            background: theme.mainColor
+            background: '#000'
             border: 'none'
             padding: '4px 0'
 

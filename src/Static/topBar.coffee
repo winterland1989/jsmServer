@@ -1,7 +1,5 @@
-m = require "./jsm/base/mithril"
-s = require "./jsm/base/mss"
-
-theme = require "./theme"
+m = require './jsm/base/mithril'
+s = require './jsm/base/mss'
 
 class SimpleAutoComplete
     constructor: (
@@ -31,7 +29,7 @@ search = view: ->
         m 'span.SearchLabel', 'search:'
         autoComplete.view()
 
-s.tag do (lineHeight = '40px', fontSize = '1em', fontColor = '#fff', bgColor = theme.mainColor) ->
+s.tag do (lineHeight = '48px', fontSize = '1em', fontColor = '#fff', bgColor = '#000') ->
     '#topBar': s.PosRel() s.ClearFix$
         width: '100%'
         background: bgColor
@@ -42,7 +40,13 @@ s.tag do (lineHeight = '40px', fontSize = '1em', fontColor = '#fff', bgColor = t
 
         '': SimpleAutoComplete.mss(lineHeight, fontSize, '480px', fontColor, bgColor)
 
-    "#userinfo":
+    '#indexLink': s.LineSize('48px', '18px')
+        float: 'left'
+        color: 'red'
+        padding:'0 16px'
+        textDecoration: 'none'
+
+    '#userinfo':
         float: 'right'
         paddingRight: '4px'
         a: s.LineSize(lineHeight, fontSize)

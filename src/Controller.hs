@@ -2,7 +2,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes       #-}
 {-# LANGUAGE TemplateHaskell   #-}
-{-# LANGUAGE LambdaCase   #-}
+{-# LANGUAGE LambdaCase        #-}
 
 module Controller (
     rootRouter
@@ -14,27 +14,28 @@ module Controller (
 
 import           Control.Monad.Apiary.Action
 import           Control.Monad.Apiary.Filter.Capture
+import           Crypto.Hash
 import qualified Data.Aeson                          as JSON
+import           Data.Char
+import           Data.Int
+import           Data.Proxy
 import           Data.Text                           (Text)
 import qualified Data.Text                           as T
 import qualified Data.Text.Encoding                  as T
+import qualified Data.ByteString as BS
 import           Data.Time.Clock
 import           Database.Persist.Sqlite
+import           Lens.Simple
 import           Lucid
 import           Model
+import qualified Network.Wai.Parse                   as P
+import           Text.Digestive                      (getForm, postForm)
+import           Text.Digestive.Types
 import           View
 import           Web.Apiary
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
-import Network.HTTP.Types.Header
-import           Crypto.Hash.SHA256 (hash)
-import           Text.Digestive (getForm, postForm)
-import Text.Digestive.Types
-import           Lens.Simple
-import  Data.Proxy
-import Data.Int
-import qualified Network.Wai.Parse as P
 
 notFound404Page :: ActionT ext prms IO ()
 notFound404Page = do
@@ -48,7 +49,7 @@ notFound404Api = status notFound404 >> stop
 notFound404Router :: Monad m => ApiaryT ext prms IO m ()
 notFound404Router = anyPath $ action notFound404Page
 
-rootRouter :: Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
+rootRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 rootRouter = root . method GET . action $ do
     contentType "text/html"
     ss <- runSql $ selectList [] [(LimitTo 20), Desc SnippetMtime]
@@ -56,7 +57,7 @@ rootRouter = root . method GET . action $ do
     lazyBytes . renderBS . indexPage u
         $ map (\(Entity _ snippet) -> snippet) ss
 
-searchRouter :: Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
+searchRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 searchRouter = [capture|/search|] . method GET . action $ do
     contentType "text/html"
     stop
@@ -71,7 +72,7 @@ paramsToEnv ((k, v):rest) p = do
         else paramsToEnv rest p
 paramsToEnv _ _ = fail "Parameter not found"
 
-userRouter :: Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
+userRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 userRouter = do
 
     [capture|/login|] $ do
@@ -112,9 +113,11 @@ userRouter = do
         stop
 
   where
-    hash' = T.pack . show . hash . T.encodeUtf8
+    md5 :: BS.ByteString -> Digest MD5
+    md5 = hash
+    hash' = T.decodeUtf8 . digestToHexByteString . md5 . T.encodeUtf8
 
-commentRouter ::  Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
+commentRouter ::  Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 commentRouter = do
     [capture|/comment|] $ do
         method POST . ([key|sid|] =: pInt64) . ([key|content|] =: pText) . action $ do
@@ -138,7 +141,7 @@ commentRouter = do
     pInt64 :: Proxy Int64
     pInt64 = Proxy
 
-snippetRouter :: Monad m => ApiaryT '[Session T.Text IO, Persist, Logger] '[] IO m ()
+snippetRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 snippetRouter = do
 
     [capture|/author::Text/title::Text/version::Int|] . method GET . action $ do
@@ -150,35 +153,55 @@ snippetRouter = do
                 lazyBytes . renderBS $ snippetPage u sid snippet
             _ -> notFound404Page
 
-    [capture|/snippet/author::Text/title::Text/version::Int|] $ do
+    [capture|/snippet|] $ do
 
-        method GET . action $ do
-            (author, title, version) <- [params|author, title, version|]
-            (runSql $ getBy (UniqueSnippet author title version)) >>= \case
-                Just (Entity sId snippet) -> do
-                    runSql $ update sId [SnippetDownload +=. 1]
-                    jsonRes snippet
-                _ -> notFound404Api
+        method GET .
+            ([key|author|] =: pText) .
+            ([key|title|] =: pText) .
+            ([key|version|] =: pInt) . action $ do
+                (author, title, version) <- [params|author, title, version|]
+                (runSql $ getBy (UniqueSnippet author title version)) >>= \case
+                    Just (Entity sId snippet) -> do
+                        runSql $ update sId [SnippetDownload +=. 1]
+                        jsonRes snippet
+                    _ -> notFound404Api
 
-        method POST . action $ do
-            (author, title, version) <- [params|author, title, version|]
-            p <- getReqBodyParams
-            case (,) <$> (lookup "language" p) <*> (lookup "content" p) of
-                Just (language, content) -> do
-                    logging "post snippet"
-                    let language' = T.decodeUtf8 language
-                    let content' = T.decodeUtf8 content
-                    now <- liftIO getCurrentTime
+        method POST .
+            ([key|author|] =: pText) .
+            ([key|pwdHash|] =: pText) .
+            ([key|title|] =: pText) .
+            ([key|version|] =: pInt) .
+            ([key|language|] =: pText) .
+            ([key|content|] =: pText) . action $ do
+                (author, pwdHash, title, language, content)
+                    <- [params|author, pwdHash, title, language, content|]
+                liftIO $ print author
+                liftIO $ print pwdHash
+                (runSql . getBy $ UniqueUser author pwdHash) >>= \case
+                    Just _ -> do
+                        logging "post snippet"
+                        now <- liftIO getCurrentTime
 
-                    Entity _ snippet <- runSql $ upsert
-                        (Snippet author title content' language' version (-1) now 0)
-                        [   SnippetRevision +=. 1
-                        ,   SnippetContent  =. content'
-                        ,   SnippetMtime    =. now
-                        ,   SnippetLanguage =. language'
-                        ]
+                        Entity sid snippet <- runSql $ upsert
+                            (Snippet author title content language 0 (-1) now 0)
+                            [   SnippetRevision +=. 1
+                            ,   SnippetContent  =. content
+                            ,   SnippetMtime    =. now
+                            ,   SnippetLanguage =. language
+                            ]
 
-                    jsonRes snippet
+                        let kw' = map (flip SearchMap $ sid) (extractKeyWord title)
+                        runSql $ insertMany_ kw'
 
-                _ -> notFound404Api
+                        jsonRes snippet
 
+                    _ -> notFound404Api
+
+        method DELETE .
+            ([key|author|] =: pText) .
+            ([key|pwdHash|] =: pText) .
+            ([key|title|] =: pText) . action $ do
+                stop
+
+  where
+    extractKeyWord = T.split isUpper
