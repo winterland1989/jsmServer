@@ -115,7 +115,7 @@ userRouter = do
                                     UserEmail =. p ^. newEmail
                                 ,   UserDesc =. p ^. newDesc
                                 ]
-                            redirect $ "/user" <> T.encodeUtf8 u'
+                            redirect $ "/user/" <> T.encodeUtf8 u'
                         Nothing -> renderPage profilePage pform
 
                 Nothing -> do
