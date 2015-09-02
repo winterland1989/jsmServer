@@ -16,7 +16,7 @@ module View (
 ) where
 
 import           Crypto.Hash
-import           Data.Foldable                    (forM_)
+import           Control.Monad
 import           Data.Monoid
 import           Data.Text                        (Text)
 import qualified Data.Text                        as T

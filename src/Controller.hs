@@ -13,6 +13,7 @@ module Controller (
 ,   notFound404Router
 ) where
 
+import           Control.Monad
 import           Control.Monad.Apiary.Action
 import           Control.Monad.Apiary.Filter.Capture
 import qualified Data.Aeson                          as JSON
@@ -107,15 +108,14 @@ userRouter = do
                     case profile of
                         Just p  -> do
                             let newP = p ^. newPassword
-                            if newP /= ""
-                                then runSql $ updateWhere
+                            when (newP /= "") $ (runSql $ updateWhere
                                     [ UserName ==. u'] [ UserPwdHash =. hash' (p ^. newPassword) ]
-                                else return ()
+                                )
                             runSql $ updateWhere [ UserName ==. u'] [
                                     UserEmail =. p ^. newEmail
                                 ,   UserDesc =. p ^. newDesc
                                 ]
-                            redirect "/profile"
+                            redirect $ "/user" <> T.encodeUtf8 u'
                         Nothing -> renderPage profilePage pform
 
                 Nothing -> do
@@ -226,11 +226,9 @@ snippetRouter = do
                             ,   SnippetLanguage =. language
                             ]
 
-                        if snippet ^. snippetRevision == 0
-                            then do
-                                let kw' = map (flip SearchMap $ sid) (extractKeyWord title)
-                                runSql $ insertMany_ kw'
-                            else return ()
+                        when (snippet ^. snippetRevision == 0) $ do
+                            let kw' = map (flip SearchMap $ sid) (extractKeyWord title)
+                            runSql $ insertMany_ kw'
 
                         jsonRes snippet
 
