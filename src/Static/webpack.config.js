@@ -2,7 +2,8 @@ module.exports = {
     entry: {
         index: "./index.coffee",
         snippet: "./snippet.coffee",
-        login: "./login.coffee"
+        login: "./login.coffee",
+        user: "./user.coffee"
     },
     output: {
         path: __dirname,

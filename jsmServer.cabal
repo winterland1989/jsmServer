@@ -49,7 +49,9 @@ executable jsmServer
                     ,   digestive-functors
                     ,   html-email-validate
                     ,   wai-extra
-                    ,   Spock
+                    ,   cmark
+                    ,   monad-control
+                    ,   monad-logger
 
   ghc-options:     -Wall -O2 -threaded
   -- hs-source-dirs:      

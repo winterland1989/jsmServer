@@ -54,6 +54,7 @@ startServer port dbfile = do
         def $ do
             rootRouter
             userRouter
+            searchRouter
             snippetRouter
             commentRouter
             notFound404Router

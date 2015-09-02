@@ -49,7 +49,7 @@ s.tag do (lineHeight = '48px', fontSize = '1em', fontColor = '#fff', bgColor = '
     '#userinfo':
         float: 'right'
         paddingRight: '4px'
-        a: s.LineSize(lineHeight, fontSize)
+        a_span: s.LineSize(lineHeight, fontSize)
             color: fontColor
             margin: '0 4px'
             textDecoration: 'none'

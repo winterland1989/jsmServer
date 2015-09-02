@@ -8,13 +8,13 @@ module Controller (
     rootRouter
 ,   userRouter
 ,   snippetRouter
+,   searchRouter
 ,   commentRouter
 ,   notFound404Router
 ) where
 
 import           Control.Monad.Apiary.Action
 import           Control.Monad.Apiary.Filter.Capture
-import           Crypto.Hash
 import qualified Data.Aeson                          as JSON
 import           Data.Char
 import           Data.Int
@@ -22,15 +22,14 @@ import           Data.Proxy
 import           Data.Text                           (Text)
 import qualified Data.Text                           as T
 import qualified Data.Text.Encoding                  as T
-import qualified Data.ByteString as BS
 import           Data.Time.Clock
 import           Database.Persist.Sqlite
 import           Lens.Simple
 import           Lucid
 import           Model
 import qualified Network.Wai.Parse                   as P
-import           Text.Digestive                      (getForm, postForm)
 import           Text.Digestive.Types
+import           Text.Digestive.View
 import           View
 import           Web.Apiary
 import           Web.Apiary.Database.Persist
@@ -49,6 +48,16 @@ notFound404Api = status notFound404 >> stop
 notFound404Router :: Monad m => ApiaryT ext prms IO m ()
 notFound404Router = anyPath $ action notFound404Page
 
+jsonRes :: JSON.ToJSON a => a -> ActionT ext prms IO ()
+jsonRes = lazyBytes . JSON.encode
+
+paramsToEnv :: Monad m => [P.Param] -> Path -> m [FormInput]
+paramsToEnv ((k, v):rest) p = do
+    if  T.decodeUtf8 k == fromPath p
+        then return [TextInput $ T.decodeUtf8 v]
+        else paramsToEnv rest p
+paramsToEnv _ _ = fail "Parameter not found"
+
 rootRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 rootRouter = root . method GET . action $ do
     contentType "text/html"
@@ -62,37 +71,60 @@ searchRouter = [capture|/search|] . method GET . action $ do
     contentType "text/html"
     stop
 
-jsonRes :: JSON.ToJSON a => a -> ActionT ext prms IO ()
-jsonRes = lazyBytes . JSON.encode
-
-paramsToEnv :: Monad m => [P.Param] -> Path -> m [FormInput]
-paramsToEnv ((k, v):rest) p = do
-    if  T.decodeUtf8 k == fromPath p
-        then return [TextInput $ T.decodeUtf8 v]
-        else paramsToEnv rest p
-paramsToEnv _ _ = fail "Parameter not found"
-
 userRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 userRouter = do
 
     [capture|/login|] $ do
         method GET . action $ do
             contentType "text/html"
-            lform <- getForm "login" loginForm
             rform <- getForm "register" registerForm
-            lazyBytes . renderBS $ loginPage lform rform
+            u <- getSession pText
+            case u of
+                Just u'  -> do
+                    Just (Entity _ user) <- runSql $ getBy (PrimaryUserName u')
+                    lform <- getForm "profile" (profileForm u')
+                    let lform' = lform {viewInput = [
+                            (toPath "email", TextInput $ user ^. userEmail)
+                        ,   (toPath "desc", TextInput $ user ^. userDesc)
+                        ]}
+                    lazyBytes . renderBS $ profilePage lform' rform
+                Nothing -> do
+                    lform <- getForm "login" loginForm
+                    lazyBytes . renderBS $ loginPage lform rform
 
         method POST . action $ do
             userParams <- getReqBodyParams
-            (lform, linfo) <- postForm "login" loginForm (\_-> return $ paramsToEnv userParams)
-            case linfo of
-                Just i  -> do
-                    setSession pText $ i ^. loginName
-                    redirect "/"
+            u <- getSession pText
+            let mkFormEnv = (\_-> return $ paramsToEnv userParams)
+            let renderPage page f = do
+                 contentType "text/html"
+                 rform <- getForm "register" registerForm
+                 lazyBytes . renderBS $ page f rform
+
+            case u of
+                Just u'  -> do
+                    (pform, profile) <- postForm "profile" (profileForm u') mkFormEnv
+                    case profile of
+                        Just p  -> do
+                            let newP = p ^. newPassword
+                            if newP /= ""
+                                then runSql $ updateWhere
+                                    [ UserName ==. u'] [ UserPwdHash =. hash' (p ^. newPassword) ]
+                                else return ()
+                            runSql $ updateWhere [ UserName ==. u'] [
+                                    UserEmail =. p ^. newEmail
+                                ,   UserDesc =. p ^. newDesc
+                                ]
+                            redirect "/profile"
+                        Nothing -> renderPage profilePage pform
+
                 Nothing -> do
-                    contentType "text/html"
-                    rform <- getForm "register" registerForm
-                    lazyBytes . renderBS $ loginPage lform rform
+                    (lform, linfo) <- postForm "login" loginForm mkFormEnv
+                    case linfo of
+                        Just i  -> do
+                            setSession pText $ i ^. loginName
+                            redirect "/"
+                        Nothing -> renderPage loginPage lform
 
     [capture|/register|] . method POST . action $ do
         userParams <- getReqBodyParams
@@ -109,13 +141,17 @@ userRouter = do
 
     [capture|/logout|] . method GET . action $ deleteSession pText >> redirect "/"
 
-    [capture|/home/user:pText|] .method GET . action $ do
-        stop
+    [capture|/user/user::Text|] . method GET . action $ do
+        contentType "text/html"
+        user <- param [key|user|]
+        ss <- runSql $ selectList [SnippetAuthor ==. user] [Desc SnippetMtime]
+        (runSql $ getBy (PrimaryUserName user)) >>= \case
+            Just (Entity _ u') -> do
+                u <- getSession pText
+                lazyBytes . renderBS . userPage u u'
+                    $ map (\(Entity _ snippet) -> snippet) ss
+            _ -> notFound404Page
 
-  where
-    md5 :: BS.ByteString -> Digest MD5
-    md5 = hash
-    hash' = T.decodeUtf8 . digestToHexByteString . md5 . T.encodeUtf8
 
 commentRouter ::  Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 commentRouter = do
@@ -173,25 +209,28 @@ snippetRouter = do
             ([key|version|] =: pInt) .
             ([key|language|] =: pText) .
             ([key|content|] =: pText) . action $ do
-                (author, pwdHash, title, language, content)
-                    <- [params|author, pwdHash, title, language, content|]
-                liftIO $ print author
-                liftIO $ print pwdHash
+
+                (author, pwdHash, title, version, language, content)
+                    <- [params|author, pwdHash, title, version, language, content|]
+
                 (runSql . getBy $ UniqueUser author pwdHash) >>= \case
                     Just _ -> do
                         logging "post snippet"
                         now <- liftIO getCurrentTime
 
                         Entity sid snippet <- runSql $ upsert
-                            (Snippet author title content language 0 (-1) now 0)
+                            (Snippet author title content language version (-1) now 0)
                             [   SnippetRevision +=. 1
                             ,   SnippetContent  =. content
                             ,   SnippetMtime    =. now
                             ,   SnippetLanguage =. language
                             ]
 
-                        let kw' = map (flip SearchMap $ sid) (extractKeyWord title)
-                        runSql $ insertMany_ kw'
+                        if snippet ^. snippetRevision == 0
+                            then do
+                                let kw' = map (flip SearchMap $ sid) (extractKeyWord title)
+                                runSql $ insertMany_ kw'
+                            else return ()
 
                         jsonRes snippet
 

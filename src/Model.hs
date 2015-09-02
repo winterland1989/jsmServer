@@ -60,5 +60,13 @@ data LoginInfo = LoginInfo {
     ,   _loginPassword :: Text
     } deriving (Show)
 
+data Profile = Profile {
+        _oldPassword :: Text
+    ,   _newPassword :: Text
+    ,   _newEmail :: Text
+    ,   _newDesc :: Text
+    }
+
 makeLenses ''LoginInfo
+makeLenses ''Profile
 

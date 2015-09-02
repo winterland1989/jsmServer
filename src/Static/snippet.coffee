@@ -1,9 +1,12 @@
 require './topBar'
 m = require './jsm/base/mithril'
+aceMode = require './aceMode'
 
+language = (document.getElementById 'editor').dataset.language
 editor = ace.edit 'editor'
 editor.setTheme 'ace/theme/tomorrow'
-editor.getSession().setMode 'ace/mode/javascript'
+
+editor.getSession().setMode aceMode[language]
 
 
 commentInputDom = document.getElementById 'commentInput'

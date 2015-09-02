@@ -44,17 +44,21 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var comment, commentArray, commentForm, commentFormDom, commentInputDom, commentLoading, commentText, editor, m, onTextAreaChange, s, sid, submitComment;
+	var aceMode, comment, commentArray, commentForm, commentFormDom, commentInputDom, commentLoading, commentText, editor, language, m, onTextAreaChange, s, sid, submitComment;
 
-	__webpack_require__(8);
+	__webpack_require__(1);
 
-	m = __webpack_require__(1);
+	m = __webpack_require__(2);
+
+	aceMode = __webpack_require__(5);
+
+	language = (document.getElementById('editor')).dataset.language;
 
 	editor = ace.edit('editor');
 
 	editor.setTheme('ace/theme/tomorrow');
 
-	editor.getSession().setMode('ace/mode/javascript');
+	editor.getSession().setMode(aceMode[language]);
 
 	commentInputDom = document.getElementById('commentInput');
 
@@ -139,7 +143,7 @@
 	  m.mount(commentFormDom, commentForm);
 	}
 
-	s = __webpack_require__(3);
+	s = __webpack_require__(4);
 
 	s.tag({
 	  html_body: s.Size('100%', '100%')(s.PosRel(0, 0)({
@@ -198,6 +202,88 @@
 
 /***/ },
 /* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var SimpleAutoComplete, autoComplete, m, s, search;
+
+	m = __webpack_require__(2);
+
+	s = __webpack_require__(4);
+
+	SimpleAutoComplete = (function() {
+	  function SimpleAutoComplete() {}
+
+	  SimpleAutoComplete.prototype.view = function() {
+	    return m('.SimpleAutoComplete', m('input'), m('.Suggetion'));
+	  };
+
+	  return SimpleAutoComplete;
+
+	})();
+
+	SimpleAutoComplete.mss = function(lineHeight, fontSize, width, fontColor, bgColor) {
+	  return {
+	    SimpleAutoComplete: s.LineSize(lineHeight, fontSize)({
+	      display: 'inline-block',
+	      span_input: {
+	        margin: '0 4px'
+	      },
+	      input: {
+	        width: width,
+	        border: 'none',
+	        borderBottom: '1px solid #fff',
+	        background: bgColor,
+	        color: fontColor
+	      }
+	    })
+	  };
+	};
+
+	autoComplete = new SimpleAutoComplete();
+
+	search = {
+	  view: function() {
+	    return m('.AutoCompleteWrapper', m('span.SearchLabel', 'search:'), autoComplete.view());
+	  }
+	};
+
+	s.tag((function(lineHeight, fontSize, fontColor, bgColor) {
+	  return {
+	    '#topBar': s.PosRel()(s.ClearFix$({
+	      width: '100%',
+	      background: bgColor,
+	      color: fontColor,
+	      SearchLabel: s.LineSize(lineHeight, fontSize)({
+	        margin: '0 4px'
+	      }),
+	      '': SimpleAutoComplete.mss(lineHeight, fontSize, '480px', fontColor, bgColor)
+	    })),
+	    '#indexLink': s.LineSize('48px', '18px')({
+	      float: 'left',
+	      color: 'red',
+	      padding: '0 16px',
+	      textDecoration: 'none'
+	    }),
+	    '#userinfo': {
+	      float: 'right',
+	      paddingRight: '4px',
+	      a_span: s.LineSize(lineHeight, fontSize)({
+	        color: fontColor,
+	        margin: '0 4px',
+	        textDecoration: 'none'
+	      })
+	    },
+	    AutoCompleteWrapper: {
+	      float: 'left'
+	    }
+	  };
+	})('48px', '1em', '#fff', '#000'));
+
+	m.mount(document.getElementById('search'), search);
+
+
+/***/ },
+/* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module) {var m = (function app(window, undefined) {
@@ -1360,10 +1446,10 @@
 	if (typeof module != "undefined" && module !== null && module.exports) module.exports = m;
 	else if (true) !(__WEBPACK_AMD_DEFINE_RESULT__ = function() {return m}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)(module)))
 
 /***/ },
-/* 2 */
+/* 3 */
 /***/ function(module, exports) {
 
 	module.exports = function(module) {
@@ -1379,7 +1465,7 @@
 
 
 /***/ },
-/* 3 */
+/* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* WEBPACK VAR INJECTION */(function(module) {var Animate, ClearFix$, FullSize$, HoverBtn, InlineBlock, KeyFrames, LineSize, MediaQuery, Mixin, PosAbs, PosRel, Size, TextCenter$, TextEllip$, TouchScroll, Transit, Vendor, bgi, bw, gold, goldR, hsl, hsla, hyp, isIeLessThan9, linearGrad, merge, mount, mssThunk, num, parse, parsePropName, parseR, parseSelectors, pc, px, radialGrad, reTag, redraw, repeatGrad, rgb, rgba, tag, tagEl, unTag, unit;
@@ -1923,92 +2009,17 @@
 	  window.s = module.exports;
 	}
 
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)(module)))
 
 /***/ },
-/* 4 */,
-/* 5 */,
-/* 6 */,
-/* 7 */,
-/* 8 */
-/***/ function(module, exports, __webpack_require__) {
+/* 5 */
+/***/ function(module, exports) {
 
-	var SimpleAutoComplete, autoComplete, m, s, search;
-
-	m = __webpack_require__(1);
-
-	s = __webpack_require__(3);
-
-	SimpleAutoComplete = (function() {
-	  function SimpleAutoComplete() {}
-
-	  SimpleAutoComplete.prototype.view = function() {
-	    return m('.SimpleAutoComplete', m('input'), m('.Suggetion'));
-	  };
-
-	  return SimpleAutoComplete;
-
-	})();
-
-	SimpleAutoComplete.mss = function(lineHeight, fontSize, width, fontColor, bgColor) {
-	  return {
-	    SimpleAutoComplete: s.LineSize(lineHeight, fontSize)({
-	      display: 'inline-block',
-	      span_input: {
-	        margin: '0 4px'
-	      },
-	      input: {
-	        width: width,
-	        border: 'none',
-	        borderBottom: '1px solid #fff',
-	        background: bgColor,
-	        color: fontColor
-	      }
-	    })
-	  };
+	module.exports = {
+	  javascript: 'ace/mode/javascript',
+	  livescript: 'ace/mode/livescript',
+	  coffeescript: 'ace/mode/coffee'
 	};
-
-	autoComplete = new SimpleAutoComplete();
-
-	search = {
-	  view: function() {
-	    return m('.AutoCompleteWrapper', m('span.SearchLabel', 'search:'), autoComplete.view());
-	  }
-	};
-
-	s.tag((function(lineHeight, fontSize, fontColor, bgColor) {
-	  return {
-	    '#topBar': s.PosRel()(s.ClearFix$({
-	      width: '100%',
-	      background: bgColor,
-	      color: fontColor,
-	      SearchLabel: s.LineSize(lineHeight, fontSize)({
-	        margin: '0 4px'
-	      }),
-	      '': SimpleAutoComplete.mss(lineHeight, fontSize, '480px', fontColor, bgColor)
-	    })),
-	    '#indexLink': s.LineSize('48px', '18px')({
-	      float: 'left',
-	      color: 'red',
-	      padding: '0 16px',
-	      textDecoration: 'none'
-	    }),
-	    '#userinfo': {
-	      float: 'right',
-	      paddingRight: '4px',
-	      a: s.LineSize(lineHeight, fontSize)({
-	        color: fontColor,
-	        margin: '0 4px',
-	        textDecoration: 'none'
-	      })
-	    },
-	    AutoCompleteWrapper: {
-	      float: 'left'
-	    }
-	  };
-	})('48px', '1em', '#fff', '#000'));
-
-	m.mount(document.getElementById('search'), search);
 
 
 /***/ }
