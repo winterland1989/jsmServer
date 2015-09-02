@@ -162,7 +162,7 @@ registerForm = User
     <*> "email" .: check ("Not a valid email address" :: Text) isValidEmail (text Nothing)
     <*> "desc" .: text Nothing
   where
-    isUnqUser name = (runSql . getBy $ PrimaryUserName name) >>= return . isJust
+    isUnqUser name = (runSql . getBy $ PrimaryUserName name) >>= return . not . isJust
 
 registerView :: Monad m => View (HtmlT m ()) -> HtmlT m ()
 registerView v = form v "/register" $ do
