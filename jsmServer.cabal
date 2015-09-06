@@ -32,8 +32,9 @@ executable jsmServer
                     ,   cryptohash
                     ,   mime-types
                     ,   persistent
-                    ,   persistent-sqlite
                     ,   persistent-template
+                    ,   persistent-sqlite
+                    ,   persistent-postgresql
                     ,   esqueleto
                     ,   lens-simple
                     ,   bytestring
@@ -52,6 +53,7 @@ executable jsmServer
                     ,   cmark
                     ,   monad-control
                     ,   monad-logger
+                    ,   entropy
 
   ghc-options:     -Wall -O2 -threaded
   -- hs-source-dirs:      

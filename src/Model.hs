@@ -13,17 +13,20 @@
 module Model where
 
 import           Data.Text
+import           Data.ByteString
 import           Data.Time.Clock
 import           Database.Persist.TH
-import           Lens.Simple
 
-share [mkPersist sqlSettings{ mpsGenerateLenses = True }, mkMigrate "migrateAll"] [persistLowerCase|
+share [mkPersist sqlSettings{ mpsGeneric = False },
+    mkMigrate "migrateAll",
+    mkDeleteCascade sqlSettings { mpsGeneric = False }] [persistLowerCase|
 User
     name Text
+    salt ByteString
     pwdHash Text
     email Text
     desc Text
-    PrimaryUserName name
+    Primary name
     UniqueUser name pwdHash
     deriving Show
 
@@ -34,8 +37,9 @@ Snippet json
     language Text
     version Int
     revision Int
-    mtime UTCTime default=CURRENT_TIME
+    mtime UTCTime
     download Int
+    Foreign User fkAuthor author
     UniqueSnippet author title version
     deriving Show
 
@@ -45,28 +49,37 @@ SearchMap
     UniqueSearchMap keyword snippet
     deriving Show
 
+RequireMap
+    snippet SnippetId
+    require SnippetId
+    UniqueRequireMap snippet require
+    deriving Show
+
 Comment json
     snippet SnippetId
     user  Text
     content Text
-    mtime UTCTime default=CURRENT_TIME
+    mtime UTCTime
     deriving Show
 |]
 
 type SessionInfo = Maybe Text
 
+data RegisterInfo = RegisterInfo {
+        registerName      :: Text
+    ,   registerPassword  :: Text
+    ,   registerEmail     :: Text
+    ,   registerDesc      :: Text
+    } deriving (Show)
+
 data LoginInfo = LoginInfo {
-        _loginName     :: Text
-    ,   _loginPassword :: Text
+        loginName     :: Text
+    ,   loginPassword :: Text
     } deriving (Show)
 
 data Profile = Profile {
-        _oldPassword :: Text
-    ,   _newPassword :: Text
-    ,   _newEmail :: Text
-    ,   _newDesc :: Text
-    }
-
-makeLenses ''LoginInfo
-makeLenses ''Profile
-
+        oldPassword :: Text
+    ,   newPassword :: Text
+    ,   newEmail :: Text
+    ,   newDesc :: Text
+    } deriving (Show)

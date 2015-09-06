@@ -9,8 +9,8 @@ import           Data.Text          (Text)
 import qualified Data.Text.Encoding as T
 import           CMark
 
-introMarkDown :: Text
-introMarkDown = commonmarkToHtml [] $ T.decodeUtf8 $(embedFile "src/Static/intro.md")
+introHtml :: Text
+introHtml = commonmarkToHtml [] $ T.decodeUtf8 $(embedFile "src/Static/intro.md")
 
 indexScript :: Text
 indexScript = T.decodeUtf8 $(embedFile "src/Static/index.js")

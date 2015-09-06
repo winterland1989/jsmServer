@@ -1,22 +1,24 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE QuasiQuotes       #-}
-{-# LANGUAGE TemplateHaskell   #-}
 
 module Main where
 
 import           Control.Monad
 import           Control.Monad.Apiary.Action
-import           Controller
+import           Controller.Comment
+import           Controller.Root
+import           Controller.Search
+import           Controller.Snippet
+import           Controller.User
+import           Controller.Utils
 import           Data.Serialize.Text              ()
 import qualified Data.Text                        as T
-import           Database.Persist.Sqlite
+import qualified Data.Text.Encoding                       as T
+import           Database.Persist.Postgresql
 import           Model
 import           Network.Wai.Handler.Warp         (run)
 import           System.Environment               (getArgs, lookupEnv)
-import           System.IO
-import           System.IO.Error
 import           Text.Read                        (readMaybe)
 import           Web.Apiary
 import           Web.Apiary.Database.Persist
@@ -28,23 +30,22 @@ main = getArgs >>= parseArgs
   where
     parseArgs ["-h"] = usage
     parseArgs ["-v"] = version
-    parseArgs [dbfile] = do
+    parseArgs [connStr] =
         lookupEnv "PORT" >>= return . (>>= readMaybe) >>= \case
-            Just port -> startServer port dbfile
-            Nothing -> startServer 80 dbfile
-    parseArgs [] = parseArgs ["jsm.db"]
+            Just port -> startServer port connStr
+            Nothing -> startServer 80 connStr
     parseArgs _ = usage
 
     usage   = putStrLn "Usage: jsmServer [-vh]"
-           >> putStrLn "       PORT=XX jsmServer dbfile"
+           >> putStrLn "       PORT=XX jsmServer postgreSqlConnectString"
     version = putStrLn "jsmServer v0.1"
 
 startServer :: Int -> FilePath -> IO ()
-startServer port dbfile = do
+startServer port connStr = do
     putStr "jsmServer started @" >> print port
     runApiaryWith (run port)
         (initLogger def
-            +> initPersistPool (withSqlitePool (T.pack dbfile) 10) migrateAll
+            +> initPersistPool (withPostgresqlPool (T.encodeUtf8 $ T.pack connStr) 10) migrateAll
             +> initClientSession pText def{
                     csCookieName = "jsm_acess_sess"
                 ,   csCookieSecure = False
