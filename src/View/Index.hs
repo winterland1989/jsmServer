@@ -24,7 +24,7 @@ indexPage u ss = doctypehtml_ . html_ $ do
         div_ [id_ "latestList"] $ do
             h1_ "Lastest published:"
             ul_ $
-                forM_ ss $ \(Snippet author title content language version revision mtime _) ->
+                forM_ ss $ \(Snippet author title content language version _ revision mtime _) ->
                     li_ $ do
                         div_ [class_ "CodeInfo"] $ do
                             a_ [href_ $  "/user/" <> author] $ toHtml author

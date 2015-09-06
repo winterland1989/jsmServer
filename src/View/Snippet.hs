@@ -11,7 +11,8 @@ import View.Utils
 import Database.Persist.Sql
 
 snippetPage :: SessionInfo -> SnippetId -> Snippet -> Html ()
-snippetPage u sid (Snippet author title content language version revision mtime download) =
+snippetPage u sid
+    (Snippet author title content language version keywords revision mtime download) =
     doctypehtml_ . html_ $ do
         pageTitle $ title <> textShow revision
         script_ [src_ aceScriptCdnUrl] ("" :: Text)

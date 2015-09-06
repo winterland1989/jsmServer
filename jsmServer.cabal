@@ -33,8 +33,8 @@ executable jsmServer
                     ,   mime-types
                     ,   persistent
                     ,   persistent-template
-                    ,   persistent-sqlite
                     ,   persistent-postgresql
+                    ,   postgresql-simple
                     ,   esqueleto
                     ,   lens-simple
                     ,   bytestring

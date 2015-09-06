@@ -12,10 +12,13 @@
 
 module Model where
 
-import           Data.Text
-import           Data.ByteString
-import           Data.Time.Clock
+import           Data.ByteString     (ByteString)
+import           Data.Text           (Text)
+import           Data.Time.Clock     (UTCTime)
 import           Database.Persist.TH
+import Control.Monad
+import Database.Persist.Postgresql.Json
+
 
 share [mkPersist sqlSettings{ mpsGeneric = False },
     mkMigrate "migrateAll",
@@ -36,17 +39,12 @@ Snippet json
     content Text
     language Text
     version Int
+    keywords Jsonb
     revision Int
-    mtime UTCTime
     download Int
+    mtime UTCTime
     Foreign User fkAuthor author
     UniqueSnippet author title version
-    deriving Show
-
-SearchMap
-    keyword Text
-    snippet SnippetId
-    UniqueSearchMap keyword snippet
     deriving Show
 
 RequireMap
@@ -66,10 +64,10 @@ Comment json
 type SessionInfo = Maybe Text
 
 data RegisterInfo = RegisterInfo {
-        registerName      :: Text
-    ,   registerPassword  :: Text
-    ,   registerEmail     :: Text
-    ,   registerDesc      :: Text
+        registerName     :: Text
+    ,   registerPassword :: Text
+    ,   registerEmail    :: Text
+    ,   registerDesc     :: Text
     } deriving (Show)
 
 data LoginInfo = LoginInfo {
@@ -80,6 +78,6 @@ data LoginInfo = LoginInfo {
 data Profile = Profile {
         oldPassword :: Text
     ,   newPassword :: Text
-    ,   newEmail :: Text
-    ,   newDesc :: Text
+    ,   newEmail    :: Text
+    ,   newDesc     :: Text
     } deriving (Show)

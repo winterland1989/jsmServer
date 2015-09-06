@@ -8,7 +8,9 @@ import           Control.Monad.Apiary.Action
 import           Control.Monad.Apiary.Filter.Capture
 import           Crypto.Hash
 import qualified Data.Aeson                          as JSON
+import  Data.Aeson                          (FromJSON, ToJSON)
 import           Data.ByteString                     (ByteString)
+import           Data.ByteString.Lazy                     (fromStrict)
 import           Data.Monoid
 import           Data.Text                           (Text)
 import qualified Data.Text                           as T
@@ -48,6 +50,9 @@ paramsToEnv _ _ = fail "Parameter not found"
 
 textShow :: Show a => a -> Text
 textShow = T.pack . show
+
+decodeJsonText :: (FromJSON a, ToJSON a) => Text -> Maybe a
+decodeJsonText =  JSON.decode . fromStrict . T.encodeUtf8
 
 hashPassword :: Text -> ByteString -> Text
 hashPassword pass salt = T.decodeUtf8 . digestToHexByteString . md5 $

@@ -22,7 +22,7 @@ userPage u u' ss = doctypehtml_ . html_ $ do
         div_ [id_ "userList"] $ do
             h1_ .toHtml $ userName u' <> "'s snippets:"
             ul_ $
-                forM_ ss $ \(Snippet author title _ language version revision mtime _) ->
+                forM_ ss $ \(Snippet author title _ language version _ revision mtime _) ->
                     li_ $
                         div_ [class_ "CodeInfo"] $ do
                             a_ [href_ $  "/" <> author <> "/" <> title <> "/" <> textShow version] $

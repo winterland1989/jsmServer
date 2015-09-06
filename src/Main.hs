@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Main where
 
@@ -53,9 +54,24 @@ startServer port connStr = do
                 }
         )
         def $ do
+            createKeywordsIndex
             rootRouter
             userRouter
             searchRouter
             snippetRouter
             commentRouter
             notFound404Router
+
+  where
+    createKeywordsIndex = runSql $ do
+        a <- rawSql "SELECT count(*) from pg_class where relname=?"
+            [PersistText "snippet_keywords_idx"]
+        case a of
+            [Just (s::Single PersistValue)] -> do
+                if unSingle s == PersistInt64 0
+                    then do
+                        rawExecute
+                            "CREATE INDEX snippet_keywords_idx ON snippet USING gin (keywords)" []
+                        liftIO $ putStrLn "Creating index on snippet keywords."
+                    else liftIO $ putStrLn "Index exists, skip create index on snippet keywords."
+            _ -> fail "Fail to check index, check you database."
