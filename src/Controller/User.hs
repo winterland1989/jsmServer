@@ -7,18 +7,10 @@
 module Controller.User where
 
 import           Control.Monad
-import qualified Data.Aeson                          as JSON
-import           Data.Char
-import           Data.Int
-import           Data.Proxy
 import           Data.Text                           (Text)
-import qualified Data.Text                           as T
 import qualified Data.Text.Encoding                  as T
-import           Data.Time.Clock
 import           Database.Persist.Postgresql
-import           Lucid
 import           Model
-import qualified Network.Wai.Parse                   as P
 import           System.Entropy
 import           Text.Digestive.Types
 import           Text.Digestive.View
@@ -39,7 +31,6 @@ userRouter = do
 
     [capture|/login|] $ do
         method GET . action $ do
-            contentType "text/html"
             rform <- getForm "register" registerForm
             u <- getSession pText
             case u of
@@ -50,19 +41,15 @@ userRouter = do
                             (toPath "email", TextInput $ userEmail user)
                         ,   (toPath "desc", TextInput $ userDesc user)
                         ]}
-                    lazyBytes . renderBS $ profilePage lform' rform
+                    lucidRes $ profilePage lform' rform
                 Nothing -> do
                     lform <- getForm "login" loginForm
-                    lazyBytes . renderBS $ loginPage lform rform
+                    lucidRes $ loginPage lform rform
 
         method POST . action $ do
             userParams <- getReqBodyParams
             u <- getSession pText
             let mkFormEnv = (\_-> return $ paramsToEnv userParams)
-            let renderPage page f = do
-                 contentType "text/html"
-                 rform <- getForm "register" registerForm
-                 lazyBytes . renderBS $ page f rform
 
             case u of
                 Just u'  -> do
@@ -80,7 +67,7 @@ userRouter = do
                                         ,   UserDesc =. newDesc p
                                         ]
                                     redirect $ "/user/" <> T.encodeUtf8 u'
-                                Nothing -> renderPage profilePage pform
+                                Nothing -> renderLoginPage profilePage pform
                         Nothing -> do
                             deleteSession pText
                             redirect "/"
@@ -91,7 +78,7 @@ userRouter = do
                         Just l  -> do
                             setSession pText $ loginName l
                             redirect "/"
-                        Nothing -> renderPage loginPage lform
+                        Nothing -> renderLoginPage loginPage lform
 
     [capture|/register|] . method POST . action $ do
         userParams <- getReqBodyParams
@@ -109,19 +96,22 @@ userRouter = do
                 setSession pText $ registerName r
                 redirect "/"
             Nothing -> do
-                contentType "text/html"
                 lform <- getForm "login" loginForm
-                lazyBytes . renderBS $ loginPage lform rform
+                lucidRes $ loginPage lform rform
 
     [capture|/logout|] . method GET . action $ deleteSession pText >> redirect "/"
 
     [capture|/user/user::Text|] . method GET . action $ do
-        contentType "text/html"
         user <- param [key|user|]
         ss <- runSql $ selectList [SnippetAuthor ==. user] [Desc SnippetMtime]
         (runSql $ get (UserKey user)) >>= \case
             Just u' -> do
                 u <- getSession pText
-                lazyBytes . renderBS . userPage u u'
+                lucidRes $ userPage u u'
                     $ map (\(Entity _ snippet) -> snippet) ss
             _ -> notFound404Page
+
+  where
+    renderLoginPage page f = do
+        rform <- getForm "register" registerForm
+        lucidRes $ page f rform

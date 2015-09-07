@@ -39,6 +39,7 @@ executable jsmServer
                     ,   lens-simple
                     ,   bytestring
                     ,   text
+                    ,   vector
                     ,   time
                     ,   file-embed
                     ,   filepath

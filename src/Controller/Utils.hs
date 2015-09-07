@@ -21,7 +21,7 @@ import           Model
 import qualified Network.Wai.Parse                   as P
 import           Text.Digestive.Types
 import           View.NotFound
-import           Web.Apiary
+import           Web.Apiary hiding (Html)
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
@@ -40,6 +40,12 @@ notFound404Router = anyPath $ action notFound404Page
 
 jsonRes :: JSON.ToJSON a => a -> ActionT ext prms IO ()
 jsonRes = lazyBytes . JSON.encode
+
+textHtmlRes :: Text -> ActionT ext prms IO ()
+textHtmlRes htmlText = contentType "text/html" >> text htmlText
+
+lucidRes :: Html () -> ActionT ext prms IO ()
+lucidRes l = contentType "text/html" >> (lazyBytes $ renderBS l)
 
 paramsToEnv :: Monad m => [P.Param] -> Path -> m [FormInput]
 paramsToEnv ((k, v):rest) p =

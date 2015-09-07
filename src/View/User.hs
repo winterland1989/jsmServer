@@ -25,7 +25,7 @@ userPage u u' ss = doctypehtml_ . html_ $ do
                 forM_ ss $ \(Snippet author title _ language version _ revision mtime _) ->
                     li_ $
                         div_ [class_ "CodeInfo"] $ do
-                            a_ [href_ $  "/" <> author <> "/" <> title <> "/" <> textShow version] $
+                            a_ [href_ $  "/snippet/" <> author <> "/" <> title <> "/" <> textShow version] $
                                 toHtml (title <> textShow version)
                             span_ . toHtml $ language <> "," <> " revision" <> textShow revision
                             if revision == 0

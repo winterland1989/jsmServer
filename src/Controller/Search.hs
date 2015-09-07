@@ -30,8 +30,15 @@ import           Web.Apiary.Session.ClientSession
 import Controller.Utils
 
 
+searchItemPerPage :: Int
+searchItemPerPage = 10
 
 searchRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
-searchRouter = [capture|/search|] . method GET . action $ do
-    contentType "text/html"
-    stop
+searchRouter = method GET $ do
+
+    [capture|/search|] .  ([key|keywords|] =: pText) .  ([key|page|] =: pInt) . action $ do
+        stop
+
+    [capture|/keywords|] .  ([key|keywords|] =: pText) .  ([key|page|] =: pInt) . action $ do
+        contentType "text/html"
+        stop

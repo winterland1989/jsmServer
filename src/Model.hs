@@ -16,8 +16,7 @@ import           Data.ByteString     (ByteString)
 import           Data.Text           (Text)
 import           Data.Time.Clock     (UTCTime)
 import           Database.Persist.TH
-import Control.Monad
-import Database.Persist.Postgresql.Json
+import Database.Persist.Postgresql.Json (Jsonb)
 
 
 share [mkPersist sqlSettings{ mpsGeneric = False },
@@ -45,6 +44,11 @@ Snippet json
     mtime UTCTime
     Foreign User fkAuthor author
     UniqueSnippet author title version
+    deriving Show
+
+Keyword
+    word Text
+    Primary word
     deriving Show
 
 RequireMap

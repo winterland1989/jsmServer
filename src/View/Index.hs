@@ -24,15 +24,16 @@ indexPage u ss = doctypehtml_ . html_ $ do
         div_ [id_ "latestList"] $ do
             h1_ "Lastest published:"
             ul_ $
-                forM_ ss $ \(Snippet author title content language version _ revision mtime _) ->
+                forM_ ss $ \(Snippet author title content language version _ revision _ mtime) ->
                     li_ $ do
                         div_ [class_ "CodeInfo"] $ do
                             a_ [href_ $  "/user/" <> author] $ toHtml author
                             if revision == 0
                                 then span_ "uploaded"
                                 else span_ "revised"
-                            a_ [href_ $  "/" <> author <> "/" <> title <> "/" <> textShow version] $
+                            a_ [href_ $  "/snippet/" <> author <> "/" <> title <> "/" <> textShow version] $
                                 span_ $ toHtml (title <> textShow version)
+                            span_ . toHtml $ "(revision" <> textShow revision <> ")"
                             span_ "@"
                             span_ . toHtml . show $ mtime
 
