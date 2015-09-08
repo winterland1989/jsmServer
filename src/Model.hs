@@ -4,6 +4,7 @@
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
+{-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE QuasiQuotes                #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
@@ -29,6 +30,7 @@ SUser
     email Text
     desc Text
     Primary name
+    UniqueUser name
     deriving Show
 
 Snippet json
@@ -48,6 +50,7 @@ Snippet json
 Keyword
     word Text
     Primary word
+    UniqueKeyWord word
     deriving Show
 
 RequireMap

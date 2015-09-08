@@ -7,6 +7,7 @@
 module Controller.Search where
 
 import           Controller.Utils
+import           Control.Monad.Logger
 import qualified Data.Aeson                       as JSON
 import           Data.Text                        (Text)
 import qualified Data.Text                        as T
@@ -29,9 +30,10 @@ searchRouter = method GET $ do
     [capture|/search|] . ([key|keywords|] =: pText) . ([key|page|] =?!: (0 :: Int)) . action $ do
         (keywords, page) <- [params|keywords, page|]
         slength <- runSql $ count
-            [ SnippetKeywords <@. JSON.toJSON (T.words keywords) ]
+            [ SnippetKeywords @>. JSON.toJSON (T.words keywords) ]
+        logInfoN $ textShow (T.words keywords)
         snippets <- runSql $ selectList
-            [ SnippetKeywords <@. JSON.toJSON (T.words keywords) ]
+            [ SnippetKeywords @>. JSON.toJSON (T.words keywords) ]
             [   Asc SnippetMtime
             ,   OffsetBy $ searchItemPerPage * page
             ,   LimitTo $ searchItemPerPage * (page + 1)

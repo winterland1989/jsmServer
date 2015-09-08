@@ -34,7 +34,7 @@ executable jsmServer
                     ,   persistent
                     ,   persistent-template
                     ,   persistent-postgresql
-                    ,   postgresql-simple
+                    ,   unordered-containers
                     ,   bytestring
                     ,   text
                     ,   time

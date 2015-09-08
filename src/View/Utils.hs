@@ -7,7 +7,6 @@ import qualified Data.Text                           as T
 import           Lucid
 import           Data.Monoid
 import           Data.Time.Clock                  ()
-import           Model
 import           Static
 
 type SessionInfo = Maybe Text

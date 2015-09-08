@@ -7,10 +7,14 @@
 module Controller.Snippet where
 
 import           Control.Monad
+import           Control.Monad.Logger
 import           Control.Monad.Apiary.Action
+import           Controller.Utils
+import qualified Data.Aeson                       as JSON
 import           Data.Char
-import           Data.Text                           (Text)
-import qualified Data.Text                           as T
+import           Data.Maybe
+import           Data.Text                        (Text)
+import qualified Data.Text                        as T
 import           Data.Time.Clock
 import           Database.Persist.Postgresql
 import           Database.Persist.Postgresql.Json
@@ -20,9 +24,7 @@ import           Web.Apiary
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
-import Controller.Utils
-import Data.Maybe
-import qualified Data.Aeson as JSON
+import Data.HashMap.Strict as Map
 
 snippetRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 snippetRouter = do
@@ -43,9 +45,9 @@ snippetRouter = do
             ([key|version|] =: pInt) . action $ do
                 (author, title, version) <- [params|author, title, version|]
                 (runSql $ getBy (UniqueSnippet author title version)) >>= \case
-                    Just (Entity sId snippet) -> do
-                        runSql $ update sId [SnippetDownload +=. 1]
-                        jsonRes snippet
+                    Just (Entity sid snippet) -> do
+                        runSql $ update sid [SnippetDownload +=. 1]
+                        jsonRes $ addIdToSnippetJson sid snippet
                     _ -> notFound404Api
 
         method POST .
@@ -70,23 +72,24 @@ snippetRouter = do
                             let keywords' = fromMaybe [] (decodeJsonText keywords)
                             let keywords'' = Jsonb $ JSON.toJSON keywords'
 
-                            Entity sid _ <- runSql $ upsert
+                            Entity sid snippet <- runSql $ upsert
                                 (Snippet
                                     author title content language version
                                     keywords'' (-1) 0 now)
                                 [   SnippetRevision +=. 1
                                 ,   SnippetContent  =. content
-                                ,   SnippetKeywords  =. keywords''
+                                ,   SnippetKeywords =. keywords''
                                 ,   SnippetMtime    =. now
                                 ,   SnippetLanguage =. language
                                 ]
 
-                            forM_ keywords' $ \w -> runSql . insertBy $ Keyword w
+                            forM_ keywords' $ \w -> runSql . insertUnique $ Keyword w
 
                             let requires' = fromMaybe [] $ decodeJsonText requires
-                            forM_ requires' $ \req -> runSql . insertBy $ RequireMap sid req
+                            forM_ requires' $ \req -> runSql . insertUnique $ RequireMap sid req
 
-                            status ok200
+                            jsonRes $ addIdToSnippetJson sid snippet
+
                         False -> status networkAuthenticationRequired511
                     False -> status badRequest400
                 stop
@@ -99,3 +102,7 @@ snippetRouter = do
 
   where
     validTile title = and $ isLetter <$> T.unpack title
+
+    addIdToSnippetJson id snippet =
+        let JSON.Object o = JSON.toJSON snippet
+        in Map.insert "id" (JSON.toJSON id) o
