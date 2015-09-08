@@ -35,15 +35,11 @@ executable jsmServer
                     ,   persistent-template
                     ,   persistent-postgresql
                     ,   postgresql-simple
-                    ,   esqueleto
-                    ,   lens-simple
                     ,   bytestring
                     ,   text
-                    ,   vector
                     ,   time
                     ,   file-embed
                     ,   filepath
-                    ,   directory
                     ,   extra
                     ,   lucid
                     ,   cereal-text

@@ -24,7 +24,7 @@ commentRouter = do
     [capture|/comment|] $ do
         method POST . ([key|sid|] =: pInt64) . ([key|content|] =: pText) . action $ do
             (sid, content) <- [params|sid, content|]
-            getSession pText >>= \case
+            getSession'  >>= \case
                 Just u -> do
                     now <- liftIO getCurrentTime
                     runSql . insert_ $ Comment (toSqlKey sid) u content now

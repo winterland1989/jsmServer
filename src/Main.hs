@@ -1,12 +1,9 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 
 module Main where
 
-import           Control.Monad
-import           Control.Monad.Apiary.Action
 import           Controller.Comment
 import           Controller.Root
 import           Controller.Search
@@ -63,11 +60,9 @@ startServer port connStr = do
             notFound404Router
 
   where
-    createKeywordsIndex = runSql $ do
-        a <- rawSql "SELECT count(*) from pg_class where relname=?"
-            [PersistText "snippet_keywords_idx"]
-        case a of
-            [Just (s::Single PersistValue)] -> do
+    createKeywordsIndex = runSql $
+        rawSql "SELECT count(*) from pg_class where relname='snippet_keywords_idx'" [] >>= \case
+            [Just s] ->
                 if unSingle s == PersistInt64 0
                     then do
                         rawExecute

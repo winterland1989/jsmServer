@@ -8,9 +8,9 @@ module Controller.Root where
 
 import           Data.Text                           (Text)
 import           Database.Persist.Postgresql
-import           Lucid
 import           Model
 import           View.Index
+import           Controller.Utils
 import           Web.Apiary
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
@@ -21,6 +21,5 @@ rootRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 rootRouter = root . method GET . action $ do
     contentType "text/html"
     ss <- runSql $ selectList [] [(LimitTo 20), Desc SnippetMtime]
-    u <- getSession pText
-    lazyBytes . renderBS . indexPage u
-        $ map (\(Entity _ snippet) -> snippet) ss
+    u <- getSession'
+    lucidRes $ indexPage u (map entityVal ss)

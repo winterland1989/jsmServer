@@ -27,7 +27,7 @@ registerForm = RegisterInfo
     <*> "email" .: check ("Not a valid email address" :: Text) isValidEmail (text Nothing)
     <*> "desc" .: text Nothing
   where
-    isUnqUser name = (runSql . get $ UserKey name) >>= return . not . isJust
+    isUnqUser name = (runSql . get $ SUserKey name) >>= return . not . isJust
     isNotReserved name = not $ name `elem` ["jsm"]
 
 registerView :: Monad m => View (HtmlT m ()) -> HtmlT m ()

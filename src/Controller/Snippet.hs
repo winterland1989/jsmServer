@@ -11,7 +11,6 @@ import           Control.Monad.Apiary.Action
 import           Data.Char
 import           Data.Text                           (Text)
 import qualified Data.Text                           as T
-import qualified Data.Vector as V
 import           Data.Time.Clock
 import           Database.Persist.Postgresql
 import           Database.Persist.Postgresql.Json
@@ -32,9 +31,9 @@ snippetRouter = do
         (author, title, version) <- [params|author, title, version|]
         (runSql $ getBy (UniqueSnippet author title version)) >>= \case
             Just (Entity sid snippet) -> do
-                u <- getSession pText
+                u <- getSession'
                 lucidRes $ snippetPage u sid snippet
-            _ -> notFound404Page
+            _ -> notFound404Api
 
     [capture|/snippet|] $ do
 

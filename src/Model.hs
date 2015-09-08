@@ -4,7 +4,6 @@
 {-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses      #-}
-{-# LANGUAGE OverloadedStrings          #-}
 {-# LANGUAGE QuasiQuotes                #-}
 {-# LANGUAGE TemplateHaskell            #-}
 {-# LANGUAGE TypeFamilies               #-}
@@ -12,24 +11,24 @@
 
 module Model where
 
-import           Data.ByteString     (ByteString)
-import           Data.Text           (Text)
-import           Data.Time.Clock     (UTCTime)
+import           Data.ByteString                  (ByteString)
+import           Data.Text                        (Text)
+import           Data.Time.Clock                  (UTCTime)
+import           Database.Persist.Postgresql.Json (Jsonb)
 import           Database.Persist.TH
-import Database.Persist.Postgresql.Json (Jsonb)
 
 
 share [mkPersist sqlSettings{ mpsGeneric = False },
     mkMigrate "migrateAll",
     mkDeleteCascade sqlSettings { mpsGeneric = False }] [persistLowerCase|
-User
+
+SUser
     name Text
     salt ByteString
     pwdHash Text
     email Text
     desc Text
     Primary name
-    UniqueUser name pwdHash
     deriving Show
 
 Snippet json
@@ -42,7 +41,7 @@ Snippet json
     revision Int
     download Int
     mtime UTCTime
-    Foreign User fkAuthor author
+    Foreign SUser fkAuthor author
     UniqueSnippet author title version
     deriving Show
 
@@ -59,13 +58,13 @@ RequireMap
 
 Comment json
     snippet SnippetId
-    user  Text
+    author  Text
     content Text
     mtime UTCTime
+    Foreign SUser fkAuthor author
     deriving Show
 |]
 
-type SessionInfo = Maybe Text
 
 data RegisterInfo = RegisterInfo {
         registerName     :: Text

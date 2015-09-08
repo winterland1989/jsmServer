@@ -10,6 +10,8 @@ import           Data.Time.Clock                  ()
 import           Model
 import           Static
 
+type SessionInfo = Maybe Text
+
 textShow :: Show a => a -> Text
 textShow = T.pack . show
 
