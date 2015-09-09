@@ -11,7 +11,6 @@ jsm-client需要机器上有node环境，使用npm安装：
     npm install -g https://github.com/winterland1989/jsm-client.git
 
 新建你的入口文件，然后去require你需要require的代码片段吧，例如添加lodash的依赖，在你代码开头添加：
-然后去require你需要require的代码片段：
 
     require('./jsm/base/lodash3')
 
