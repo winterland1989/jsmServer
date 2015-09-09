@@ -204,17 +204,25 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var SimpleAutoComplete, autoComplete, m, s, search;
+	var SimpleAutoComplete, autoComplete, fireSearch, m, s, search;
 
 	m = __webpack_require__(2);
 
 	s = __webpack_require__(4);
 
+	fireSearch = function(e) {
+	  if (e.keyCode === 13) {
+	    return window.location = '/search?sort=mtime&page=0&keywords=' + e.target.value;
+	  }
+	};
+
 	SimpleAutoComplete = (function() {
 	  function SimpleAutoComplete() {}
 
 	  SimpleAutoComplete.prototype.view = function() {
-	    return m('.SimpleAutoComplete', m('input'), m('.Suggetion'));
+	    return m('.SimpleAutoComplete', m('input', {
+	      onkeyup: fireSearch
+	    }), m('.Suggetion'));
 	  };
 
 	  return SimpleAutoComplete;

@@ -15,6 +15,9 @@ introHtml = commonmarkToHtml [] $ T.decodeUtf8 $(embedFile "src/Static/intro.md"
 indexScript :: Text
 indexScript = T.decodeUtf8 $(embedFile "src/Static/index.js")
 
+searchScript :: Text
+searchScript = T.decodeUtf8 $(embedFile "src/Static/search.js")
+
 userPageScript :: Text
 userPageScript = T.decodeUtf8 $(embedFile "src/Static/user.js")
 

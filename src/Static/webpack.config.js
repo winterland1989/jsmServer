@@ -1,6 +1,7 @@
 module.exports = {
     entry: {
         index: "./index.coffee",
+        search: "./search.coffee",
         snippet: "./snippet.coffee",
         login: "./login.coffee",
         user: "./user.coffee"

@@ -12,7 +12,7 @@ import Database.Persist.Sql
 
 snippetPage :: SessionInfo -> SnippetId -> Snippet -> Html ()
 snippetPage u sid
-    (Snippet author title content language version keywords revision mtime download) =
+    (Snippet author title content language version keywords revision download mtime) =
     doctypehtml_ . html_ $ do
         pageTitle $ title <> textShow revision
         script_ [src_ aceScriptCdnUrl] ("" :: Text)

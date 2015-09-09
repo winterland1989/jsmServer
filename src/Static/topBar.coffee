@@ -1,13 +1,18 @@
 m = require './jsm/base/mithril'
 s = require './jsm/base/mss'
 
+fireSearch = (e) ->
+    if (e.keyCode == 13)
+        window.location = '/search?sort=mtime&page=0&keywords=' + e.target.value
+
 class SimpleAutoComplete
     constructor: (
     ) ->
 
     view: ->
         m '.SimpleAutoComplete',
-            m 'input'
+            m 'input',
+                onkeyup: fireSearch
             m '.Suggetion'
 
 SimpleAutoComplete.mss = (lineHeight, fontSize, width, fontColor, bgColor)->

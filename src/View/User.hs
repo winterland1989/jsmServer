@@ -18,7 +18,13 @@ userPage u u' ss = doctypehtml_ . html_ $ do
     script_ [src_ aceScriptCdnUrl] ("" :: Text)
     body_ $ do
         topBar u
-        div_ [id_ "userDesc"] (toHtmlRaw $ commonmarkToHtml [] (sUserDesc u'))
+        div_ [id_ "userDesc"] $ do
+            div_ [id_ "userEmail"] $ do
+                span_ "Email: "
+                let email = sUserEmail u'
+                a_ [href_ email] $ toHtml email
+            (toHtmlRaw $ commonmarkToHtml [] (sUserDesc u'))
+
         div_ [id_ "userList"] $ do
             h1_ .toHtml $ sUserName u' <> "'s snippets:"
             ul_ $

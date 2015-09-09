@@ -4,7 +4,7 @@ try it:
 
 ```bash
 # install jsm using npm
-npm install jsm-client -g
+npm install -g https://github.com/winterland1989/jsm-client.git
 
 # edit some script, require snippet you wanna use
 vim index.js

@@ -18,11 +18,9 @@ searchPage u len ss = doctypehtml_ . html_ $ do
     script_ [src_ aceScriptCdnUrl] ("" :: Text)
     body_ $ do
         topBar u
-        div_ [id_ "Search"] $ do
-            h1_ "Welcome to jsm, a javascript snippet manager."
-            p_ $ toHtmlRaw introHtml
-        div_ [id_ "latestList"] $ do
-            h1_ "Lastest published:"
+        div_ [id_ "searchDesc"] $ do
+            h1_ "Search for:"
+        div_ [id_ "searchList"] $ do
             ul_ $
                 forM_ ss $ \(Snippet author title content language version _ revision _ mtime) ->
                     li_ $ do
@@ -40,5 +38,5 @@ searchPage u len ss = doctypehtml_ . html_ $ do
                         div_ [class_ "CodePreview", data_ "language" language] . toHtml $
                             (T.unlines . take 8 . T.lines $ content) <> "..."
 
-        script_ indexScript
+        script_ searchScript
 

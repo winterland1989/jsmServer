@@ -96,8 +96,9 @@ snippetRouter = do
 
         method DELETE .
             ([key|author|] =: pText) .
-            ([key|pwdHash|] =: pText) .
-            ([key|title|] =: pText) . action $ do
+            ([key|password|] =: pText) .
+            ([key|title|] =: pText) .
+            ([key|version|] =: pInt) . action $ do
                 stop
 
   where

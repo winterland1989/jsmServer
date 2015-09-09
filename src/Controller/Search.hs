@@ -27,23 +27,30 @@ searchItemPerPage = 10
 searchRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 searchRouter = method GET $ do
 
-    [capture|/search|] . ([key|keywords|] =: pText) . ([key|page|] =?!: (0 :: Int)) . action $ do
-        (keywords, page) <- [params|keywords, page|]
-        slength <- runSql $ count
-            [ SnippetKeywords @>. JSON.toJSON (T.words keywords) ]
-        logInfoN $ textShow (T.words keywords)
-        snippets <- runSql $ selectList
-            [ SnippetKeywords @>. JSON.toJSON (T.words keywords) ]
-            [   Asc SnippetMtime
-            ,   OffsetBy $ searchItemPerPage * page
-            ,   LimitTo $ searchItemPerPage * (page + 1)
-            ]
-        u <- getSession'
-        if null snippets
-            then redirect "/"
-            else lucidRes $ searchPage u slength (map entityVal snippets)
+    [capture|/search|] .
+        ([key|keywords|] =: pText) .
+        ([key|sort|] =: pText) .
+        ([key|page|] =?!: (0 :: Int)) . action $ do
+            (keywords, sort, page) <- [params|keywords, sort, page|]
+            slength <- runSql $ count
+                [ SnippetKeywords @>. JSON.toJSON (T.words keywords) ]
+            logInfoN $ textShow (T.words keywords)
+            snippets <- runSql $ selectList
+                [ SnippetKeywords @>. JSON.toJSON (T.words keywords) ]
+                [   sortBy sort
+                ,   OffsetBy $ searchItemPerPage * page
+                ,   LimitTo $ searchItemPerPage * (page + 1)
+                ]
+            u <- getSession'
+            lucidRes $ searchPage u slength (map entityVal snippets)
 
     [capture|/keywords|] . ([key|word|] =: pText) . action $ do
         word <- param [key|word|]
-        kws <- runSql $ rawSql "SELECT word from keyword where word=?" []
+        kws <- runSql $ rawSql "SELECT word FROM keyword WHERE word LIKE ?%" []
         jsonRes $ map (keywordWord . entityVal) kws
+
+  where
+    sortBy sort = case sort of
+        "mtime" -> Asc SnippetMtime
+        "download" -> Asc SnippetDownload
+        _ -> Asc SnippetTitle
