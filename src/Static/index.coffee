@@ -14,8 +14,6 @@ for preview in previews
     editor.renderer.setShowGutter false
     editor.getSession().setMode aceMode[language]
 
-
-
 s.tag
     html_body:
         fontSize: '14px'

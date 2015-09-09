@@ -18,11 +18,8 @@ pageTitle :: Text -> Html ()
 pageTitle t = head_ $ do
         meta_ [charset_ "UTF-8"]
         title_ $ toHtml t
-        link_
-            [   href_ normalizeCssCDNUrl
-            ,   rel_ "stylesheet"
-            ,   type_ "text/css"
-            ]
+        link_ [ href_ normalizeCssCDNUrl , rel_ "stylesheet" , type_ "text/css" ]
+        style_ githubCssText
 
 topBar :: SessionInfo -> Html ()
 topBar u = div_ [id_ "topBar"] $ do

@@ -1,15 +1,16 @@
-Jsm is a tool for simple code management, unlike npm or bower, it's designed to be a lightweight [*snippet* manager](/doc). 
+Jsm is a tool for simple code management, unlike npm or bower, it's designed to be very lightweight. see [doc](/doc/en), [文档](/doc/cn). 
 
-try it:
+Jsm in half a minute:
 
 ```bash
 # install jsm using npm
 npm install -g https://github.com/winterland1989/jsm-client.git
 
 # edit some script, require snippet you wanna use
+# for example: _ = require('./jsm/base/lodash3')
 vim index.js
 
-# use jsm download snippet for index.js file now!
+# use jsm download snippet for index.js file now.
 jsm install index.js
 
 ```

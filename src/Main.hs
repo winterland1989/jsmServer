@@ -6,6 +6,7 @@ module Main where
 
 import           Controller.Comment
 import           Controller.Root
+import           Controller.Doc
 import           Controller.Search
 import           Controller.Snippet
 import           Controller.User
@@ -57,6 +58,7 @@ startServer port connStr = do
             searchRouter
             snippetRouter
             commentRouter
+            documentRouter
             notFound404Router
 
   where

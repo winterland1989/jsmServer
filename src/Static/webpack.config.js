@@ -4,7 +4,8 @@ module.exports = {
         search: "./search.coffee",
         snippet: "./snippet.coffee",
         login: "./login.coffee",
-        user: "./user.coffee"
+        user: "./user.coffee",
+        doc: "./doc.coffee"
     },
     output: {
         path: __dirname,
