@@ -53,24 +53,21 @@ userRouter = do
 
             case u of
                 Just u'  -> do
-                    (runSql . get $ SUserKey u') >>= \case
-                        Just (SUser _ salt _ _ _) -> do
-                            (pform, profile) <- postForm "profile" (profileForm u') mkFormEnv
-                            case profile of
-                                Just p  -> do
-                                    let newP = newPassword p
-                                    when (newP /= "") (runSql $ updateWhere
-                                            [ SUserName ==. u'] [ SUserPwdHash =. hashPassword newP salt]
-                                        )
-                                    runSql $ updateWhere [ SUserName ==. u'] [
-                                            SUserEmail =. newEmail p
-                                        ,   SUserDesc =. newDesc p
-                                        ]
-                                    redirect $ "/user/" <> T.encodeUtf8 u'
-                                Nothing -> renderLoginPage profilePage pform
-                        Nothing -> do
-                            deleteSession pText
-                            redirect "/"
+                    (pform, profile) <- postForm "profile" (profileForm u') mkFormEnv
+                    case profile of
+                        Just p  -> do
+                            let newP = newPassword p
+                            salt <- liftIO $ getEntropy 32
+                            when (newP /= "") (runSql $ updateWhere
+                                    [ SUserName ==. u']
+                                    [   SUserPwdHash =. hashPassword newP salt
+                                    ,   SUserSalt =. salt
+                                    ,   SUserEmail =. newEmail p
+                                    ,   SUserDesc =. newDesc p
+                                    ]
+                                )
+                            redirect $ "/user/" <> T.encodeUtf8 u'
+                        Nothing -> renderLoginPage profilePage pform
 
                 Nothing -> do
                     (lform, linfo) <- postForm "login" loginForm mkFormEnv
@@ -85,7 +82,7 @@ userRouter = do
         (rform, reg) <- postForm "register" registerForm (\_-> return $ paramsToEnv userParams)
         case reg of
             Just r -> do
-                salt <- liftIO $ getEntropy 64
+                salt <- liftIO $ getEntropy 32
                 _ <- runSql . insert $ SUser
                     (registerName r)
                     salt

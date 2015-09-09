@@ -61,11 +61,11 @@ paramsToEnv _ _ = fail "Parameter not found"
 
 -- User auth related
 hashPassword :: Text -> ByteString -> Text
-hashPassword pass salt = T.decodeUtf8 . digestToHexByteString . md5 $
+hashPassword pass salt = T.decodeUtf8 . digestToHexByteString . sha256 $
     T.encodeUtf8 pass <> salt
   where
-    md5 :: ByteString -> Digest MD5
-    md5 = hash
+    sha256 :: ByteString -> Digest SHA256
+    sha256 = hash
 
 verifyUser :: Text -> Text -> ActionT '[Session Text IO, Persist, Logger] prms IO Bool
 verifyUser name password = do
