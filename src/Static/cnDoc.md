@@ -94,16 +94,10 @@ jsm install A.js B.js C.coffee ...
     │   ├── myName
     │   │   ├── myModule1.js
     
-假设`myModule1.js`是你想发布的代码，你希望在代码中使用`jquery2.js`，请使用如下代码：
-
-    $ = require('../../jsm/base/jquery2.js')
-    
-而不要使用如下的代码：
+假设`myModule1.js`是你想发布的代码，你希望在代码中使用`jquery2.js`，那么：
 
     $ = require('../base/jquery2.js')
     
-因为`jsm`是识别使用`jsm`管理工具的关键字。
-
 + 请添加合适的版本号（不确定请使用`0`，见下文），如果API改变导致snippet和之前版本不兼容，请务必增加版本号，例如`foo2 -> foo3`
 
 + 请务必在代码中提供必要的文档！
