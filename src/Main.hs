@@ -4,7 +4,6 @@
 
 module Main where
 
-import           Controller.Comment
 import           Controller.Root
 import           Controller.Doc
 import           Controller.Search
@@ -29,10 +28,9 @@ main = getArgs >>= parseArgs
   where
     parseArgs ["-h"] = usage
     parseArgs ["-v"] = version
-    parseArgs [connStr] =
-        lookupEnv "PORT" >>= return . (>>= readMaybe) >>= \case
-            Just port -> startServer port connStr
-            Nothing -> startServer 80 connStr
+    parseArgs [connStr] = lookupEnv "PORT" >>= return . (>>= readMaybe) >>= \case
+        Just port -> startServer port connStr
+        Nothing -> startServer 80 connStr
     parseArgs _ = usage
 
     usage   = putStrLn "Usage: jsmServer [-vh]"
@@ -52,17 +50,19 @@ startServer port connStr = do
                 }
         )
         def $ do
-            createKeywordsIndex
+            createKeywordIndex
+
             rootRouter
             userRouter
             searchRouter
             snippetRouter
-            commentRouter
             documentRouter
             notFound404Router
 
+
+
   where
-    createKeywordsIndex = runSql $
+    createKeywordIndex = runSql $
         rawSql "SELECT count(*) from pg_class where relname='snippet_keywords_idx'" [] >>= \case
             [Just s] ->
                 if unSingle s == PersistInt64 0

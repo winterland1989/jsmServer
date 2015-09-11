@@ -22,7 +22,8 @@ searchPage u len ss = doctypehtml_ . html_ $ do
             h1_ "Search for:"
         div_ [id_ "searchList"] $ do
             ul_ $
-                forM_ ss $ \(Snippet author title content language version _ revision _ mtime) ->
+                forM_ ss $ \(Snippet
+                    author title content language version revision deprecated keywords _  _ mtime) ->
                     li_ $ do
                         div_ [class_ "CodeInfo"] $ do
                             a_ [href_ $  "/user/" <> author] $ toHtml author

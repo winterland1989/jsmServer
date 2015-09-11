@@ -1,4 +1,5 @@
 module.exports = {
+    context: __dirname + "/src",
     entry: {
         index: "./index.coffee",
         search: "./search.coffee",
@@ -8,7 +9,7 @@ module.exports = {
         doc: "./doc.coffee"
     },
     output: {
-        path: __dirname,
+        path: __dirname + '/dist',
         filename: "[name].js"
     },
     module: {

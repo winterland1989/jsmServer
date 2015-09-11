@@ -26,6 +26,7 @@ import           Web.Apiary                          hiding (Html)
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
+import qualified Data.CaseInsensitive as CI
 
 -- Notfound page, api...
 notFound404Page :: ActionT ext prms IO ()
@@ -78,9 +79,11 @@ verifyUser name password = do
 getSession' :: ActionT '[Session Text IO, Persist, Logger] prms IO SessionInfo
 getSession' = getSession pText
 
+getHeader :: ByteString -> ActionT exts prms IO (Maybe ByteString)
+getHeader name = do
+    headers <- getHeaders
+    return $ lookup (CI.mk name) headers
+
 -- others
 textShow :: Show a => a -> Text
 textShow = T.pack . show
-
-decodeJsonText :: (FromJSON a, ToJSON a) => Text -> Maybe a
-decodeJsonText =  JSON.decode . fromStrict . T.encodeUtf8

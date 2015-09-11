@@ -1,8 +1,6 @@
 s = require "./jsm/base/mss"
 
 mss = ->
-    html_body:
-        fontSize: '14px'
     body:
         width: '480px'
         margin: '0 auto'

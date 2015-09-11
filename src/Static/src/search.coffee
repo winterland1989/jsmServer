@@ -26,12 +26,10 @@ searchDesc = view: -> [
 m.mount (document.getElementById 'searchDesc'), searchDesc
 
 s.tag
-    html_body:
-        fontSize: '14px'
     h1:
         textAlign: 'center'
     '#searchList_#searchDesc':
-        width: '800px'
+        width: '960px'
         margin: '0 auto'
     '#searchDesc':
         marginTop: '20px'

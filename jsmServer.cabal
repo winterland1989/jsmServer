@@ -37,6 +37,7 @@ executable jsmServer
                     ,   unordered-containers
                     ,   bytestring
                     ,   text
+                    ,   vector
                     ,   time
                     ,   file-embed
                     ,   filepath
@@ -51,6 +52,7 @@ executable jsmServer
                     ,   monad-control
                     ,   monad-logger
                     ,   entropy
+                    ,   case-insensitive
 
   ghc-options:     -Wall -O2 -threaded
   -- hs-source-dirs:      

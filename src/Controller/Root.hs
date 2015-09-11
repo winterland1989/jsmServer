@@ -19,6 +19,6 @@ import           Web.Apiary.Session.ClientSession
 
 rootRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 rootRouter = root . method GET . action $ do
-    ss <- runSql $ selectList [] [(LimitTo 20), Desc SnippetMtime]
+    ss <- runSql $ selectList [] [ LimitTo 20, Desc SnippetMtime ]
     u <- getSession'
     lucidRes $ indexPage u (map entityVal ss)

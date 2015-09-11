@@ -2,40 +2,79 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes       #-}
 {-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE TypeOperators   #-}
 {-# LANGUAGE LambdaCase        #-}
 
 module Controller.Snippet where
 
 import           Control.Monad
-import           Control.Monad.Logger
 import           Control.Monad.Apiary.Action
+import           Control.Monad.Logger
 import           Controller.Utils
 import qualified Data.Aeson                       as JSON
 import           Data.Char
+import qualified Data.Text.Read as T
+import     qualified     Data.HashMap.Strict              as Map
 import           Data.Maybe
 import           Data.Text                        (Text)
 import qualified Data.Text                        as T
 import           Data.Time.Clock
+import           Data.Vector                      (Vector, forM_)
+import qualified Data.Vector                      as V
 import           Database.Persist.Postgresql
 import           Database.Persist.Postgresql.Json
 import           Model
+import           Text.Digestive.View
+import           Text.Digestive.Types
 import           View.Snippet
 import           Web.Apiary
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
-import Data.HashMap.Strict as Map
+
+snippetWithForm :: Maybe (View Text) -> ActionT '[Session Text IO, Persist, Logger]
+    '["version" ':= Int, "title" ':= Text, "author" ':= Text] IO ()
+snippetWithForm cform = do
+    (author, title, version) <- [params|author, title, version|]
+    (runSql $ getBy (UniqueSnippet author title version)) >>= \case
+        Just (Entity sid snippet) -> do
+            comments <- runSql $ selectList [CommentSnippet ==. sid] [LimitTo 100, Asc CommentMtime]
+            u <- getSession'
+            case cform of
+                Just cform' -> lucidRes $ snippetPage u cform' (map entityVal comments) snippet
+                Nothing -> do
+                    newCform <- getForm "comment" (commentForm)
+                    let newCform' = newCform {viewInput = [
+                            (toPath "sid", TextInput $ textShow $ fromSqlKey sid)
+                        ]}
+                    lucidRes $ snippetPage u newCform' (map entityVal comments) snippet
+        _ -> notFound404Api
+
 
 snippetRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 snippetRouter = do
 
-    [capture|/snippet/author::Text/title::Text/version::Int|] . method GET . action $ do
-        (author, title, version) <- [params|author, title, version|]
-        (runSql $ getBy (UniqueSnippet author title version)) >>= \case
-            Just (Entity sid snippet) -> do
-                u <- getSession'
-                lucidRes $ snippetPage u sid snippet
-            _ -> notFound404Api
+    [capture|/snippet/author::Text/title::Text/version::Int|] $ do
+        method GET . action $ do
+            snippetWithForm Nothing
+
+        method POST . action $ do
+            commentParams <- getReqBodyParams
+            getSession' >>= \case
+                Just u -> do
+                    let mkFormEnv = (\_-> return $ paramsToEnv commentParams)
+                    (cform, comment) <- postForm "comment" commentForm mkFormEnv
+                    now <- liftIO getCurrentTime
+                    case comment >>= parseComment of
+                        Just (sid, content) -> do
+                            runSql . insert_ $ Comment sid u content now
+                            snippetWithForm Nothing
+                        Nothing -> do
+                            liftIO $ print cform
+                            snippetWithForm $ Just cform
+
+
+                Nothing -> redirect "/login"
 
     [capture|/snippet|] $ do
 
@@ -55,43 +94,43 @@ snippetRouter = do
             ([key|password|] =: pText) .
             ([key|title|] =: pText) .
             ([key|version|] =: pInt) .
-            ([key|keywords|] =: pText) .
-            ([key|requires|] =: pText) .
+            ([key|keywords|] =: pLazyByteString) .
+            ([key|requires|] =: pLazyByteString) .
             ([key|language|] =: pText) .
             ([key|content|] =: pText) . action $ do
 
                 (author, password, title, version, keywords, requires, language, content)
                     <- [params|author, password, title, version, keywords, requires, language, content|]
 
-                case validTile title of
-                    True -> verifyUser author password >>= \case
+                let keywords' = (JSON.decode keywords) :: Maybe (Vector Text)
+                let requires' = (JSON.decode requires) :: Maybe (Vector Int)
+
+                if validTile title && isJust keywords' && isJust requires'
+                    then verifyUser author password >>= \case
                         True -> do
                             logging "post snippet"
                             now <- liftIO getCurrentTime
 
-                            let keywords' = fromMaybe [] (decodeJsonText keywords)
-                            let keywords'' = Jsonb $ JSON.toJSON keywords'
+                            let keywords'' = Jsonb $ JSON.toJSON $ fromJust keywords'
+                            let requires'' = Jsonb $ JSON.toJSON $ fromJust requires'
 
                             Entity sid snippet <- runSql $ upsert
-                                (Snippet
-                                    author title content language version
-                                    keywords'' (-1) 0 now)
+                                (Snippet author title content language version (-1) False
+                                    keywords'' requires'' 0 now)
                                 [   SnippetRevision +=. 1
+                                ,   SnippetDeprecated =. False
+                                ,   SnippetLanguage =. language
                                 ,   SnippetContent  =. content
                                 ,   SnippetKeywords =. keywords''
+                                ,   SnippetRequires =. requires''
                                 ,   SnippetMtime    =. now
-                                ,   SnippetLanguage =. language
                                 ]
 
-                            forM_ keywords' $ \w -> runSql . insertUnique $ Keyword w
-
-                            let requires' = fromMaybe [] $ decodeJsonText requires
-                            forM_ requires' $ \req -> runSql . insertUnique $ RequireMap sid req
+                            V.forM_ (fromJust keywords') $ \w -> runSql . insertUnique $ Keyword w
 
                             jsonRes $ addIdToSnippetJson sid snippet
-
                         False -> status networkAuthenticationRequired511
-                    False -> status badRequest400
+                    else status badRequest400
                 stop
 
         method DELETE .
@@ -99,6 +138,16 @@ snippetRouter = do
             ([key|password|] =: pText) .
             ([key|title|] =: pText) .
             ([key|version|] =: pInt) . action $ do
+                (author, password, title, version) <- [params|author, password, title, version|]
+                verifyUser author password >>= \case
+                    True -> do
+                        runSql $ updateWhere [
+                                SnippetAuthor ==. author
+                            ,   SnippetTitle ==. title
+                            ,   SnippetVersion ==. version
+                            ]
+                            [ SnippetDeprecated =. True ]
+                    False -> status networkAuthenticationRequired511
                 stop
 
   where
@@ -107,3 +156,8 @@ snippetRouter = do
     addIdToSnippetJson id snippet =
         let JSON.Object o = JSON.toJSON snippet
         in Map.insert "id" (JSON.toJSON id) o
+
+    parseComment :: (Text, Text) -> Maybe (SnippetId, Text)
+    parseComment (sid, content) = case T.decimal sid of
+        Left _ -> Nothing
+        Right (sid', _) -> Just (toSqlKey sid', content)

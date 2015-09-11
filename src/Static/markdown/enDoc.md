@@ -1,7 +1,7 @@
-Java Snippet Manager使用手册
-===========================
+Javascript Snippet Manager
+==========================
 
-Jsm是一个十分简单粗暴的代码管理工具，它可以帮助你快速安装，发布长度在几百行之内的CommonJs代码片段，Jsm支持的语言包括js, coffeescirpt和livescript, 在线的代码阅读器可以直接编译以方便阅读(W.I.P...)，Jsm的服务端和客户端还有许多不完善，欢迎提issue。
+Jsm是一个简单粗暴的前端代码管理工具，它可以帮助你快速安装，发布长度在几百行左右的CommonJs代码片段，Jsm支持的语言包括js, coffeescirpt和livescript, 在线的代码阅读器可以直接编译以方便阅读，Jsm的服务端和客户端还在持续改进，欢迎使用和反馈:(handong05@meituan.com)[mailto:handong05@meituan.com]。
 
 使用jsm安装代码
 ---------------
@@ -45,7 +45,7 @@ jsm install A.js B.js C.coffee ...
 
 + 不是入口文件直接依赖的snippet会被安装么？
 
-可以，假如`index.coffee`还依赖了`./widget/Dialog.coffee`，然后`./widget/Dialog.coffee`里面有`require('./jsm/base/lodash3')`，那么运行`jsm install index.js`会产生如下目录结构：   
+当然！假如`index.coffee`require了`./widget/Dialog.coffee`，然后`./widget/Dialog.coffee`里require了`./jsm/base/lodash3`，那么运行`jsm install index.js`会产生如下目录结构：   
 
     ├── index.coffee
     ├── jsm
@@ -54,19 +54,15 @@ jsm install A.js B.js C.coffee ...
     │   │   ├── jsm
     │   │   │   ├── lodash3.js
     
-一般来说我们不希望有多个层级的`jsm`目录被创建，只需要把`./widget/Dialog.coffee`中的
-
-    require('./jsm/base/lodash3')
-    
-改为
+一般来说我们不希望有多个层级的`jsm`目录被创建，自需要改变`./widget/Dialog.coffee`中require的路径即可：
 
     require('../jsm/base/lodash3')
     
-即可，也就是说要注意代码相对于`jsm`文件夹的位置。
+注意`Dialog.coffee`相对于`jsm`文件夹的位置`../jsm`。
 
 + 路径中的jsm是什么东西，可以改么？
 
-不能，正如上面提到的`jsm install`本身并不假定文件夹位置，而只是识别`jsm`关键字，为了和之后的打包流程一致，snippet都会被安装到`jsm`文件夹下。
+是个识别用的关键词，不能改，正如上面提到的`jsm install`本身并不假定文件夹位置，而只是识别`jsm`关键字，为了和之后的打包流程一致，snippet都会被安装到`jsm`文件夹下。
 
 使用jsm发布代码
 ---------------
@@ -94,7 +90,7 @@ jsm install A.js B.js C.coffee ...
     │   ├── myName
     │   │   ├── myModule1.js
     
-假设`myModule1.js`是你想发布的代码，你希望在代码中使用`jquery2.js`，那么：
+假设`myModule1.js`是你想发布的代码，你希望在代码中使用`jquery2.js`，那么这样引用：
 
     $ = require('../base/jquery2.js')
     
@@ -129,3 +125,8 @@ jsm install A.js B.js C.coffee ...
 #-jsm-keywords: async process ...
 ```
 在`jsm publish`的时候会提示解析出的关键词。
+
+待续
+====
+
+还有`update`和`deprecate`两个命令没实现，WIP...

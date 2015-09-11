@@ -15,35 +15,25 @@ for preview in previews
     editor.getSession().setMode aceMode[language]
 
 s.tag
-    html_body:
-        fontSize: '14px'
     h1:
         textAlign: 'center'
     '#latestList_#introduction':
-        width: '800px'
+        width: '960px'
         margin: '0 auto'
-    '#introduction':
-        marginTop: '20px'
-        h1:
-            fontSize: '2em'
-        p:
-            fontSize: '1em'
     '#latestList':
-        marginTop: '20px'
         ul:
-            margin: '20px 0'
             padding: 0
             listStyleType: 'none'
 
         li:
-            CodeInfo: s.LineSize('2em', '1em')
+            CodeInfo: s.LineSize('32px', '1em')
                 textAlign: 'center'
                 background: '#000'
                 color: '#fff'
                 a:
                     textDecoration: 'none'
-                    padding: '4px'
-                    color: 'red'
+                    margin: '0 4px'
+                    color: '#f48'
 
             CodePreview:
                 height: '150px'

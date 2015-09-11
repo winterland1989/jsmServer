@@ -234,31 +234,8 @@ PosRel = (top, right, bottom, left) -> (mss) ->
     if left?   then mss.left = left
     mss
 
-###
-# transistion shorthand with default value
-# type cant be :
-#
-# @param prop {String}
-# @param time {String}
-# @param type {String}
-# @param delay {String}
-# @return {mss}
-###
-Transit = (prop, time, type = 'ease', delay = '0s') -> (mss) ->
-    mss.transition = "#{prop} #{time} #{type} #{delay}"
-    mss
-
-# inline block with float extension and ie fix
-InlineBlock = (directions = 'left') -> (mss) ->
-    mss.display = 'inline-block'
-    mss.float = directions
-    mss['*zoom'] = 1
-    mss['*display'] = 'inline'
-    mss
-
 # vertical align a line
 LineSize = (lineHeight, fontS) -> (mss) ->
-    mss.verticalAlign = 'middle'
     if lineHeight?
         mss.height = mss.lineHeight = lineHeight
     if fontS?
@@ -341,11 +318,6 @@ KeyFrames = (name) -> (mss) ->
 # mixins end with $ dont need arguments #    # # # #    ########
 #########################################  #   #   #    ########
 
-# center align text
-TextCenter$ = (mss) ->
-    mss.textAlign = 'center'
-    mss
-
 # Ellipsis text
 TextEllip$ = (mss) ->
     mss.whiteSpace = 'nowrap'
@@ -365,8 +337,6 @@ ClearFix$ = (mss) ->
 
 # shorthand for width: 100% and height: 100%
 FullSize$ = Size '100%', '100%'
-
-
 
 #########################################      #   #    ########
 # UPPERCASE -> BOMBs, use with CAUTIONs!     # # # #    ########
@@ -394,8 +364,6 @@ module?.exports = {
     PosAbs
     PosRel
 
-    Transit
-    InlineBlock
     LineSize
     HoverBtn
     Vendor
@@ -404,7 +372,6 @@ module?.exports = {
     MediaQuery
     KeyFrames
 
-    TextCenter$
     TextEllip$
     ClearFix$
     FullSize$

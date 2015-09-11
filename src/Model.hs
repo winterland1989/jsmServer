@@ -39,8 +39,10 @@ Snippet json
     content Text
     language Text
     version Int
-    keywords Jsonb
     revision Int
+    deprecated Bool default=True
+    keywords Jsonb default="'[]'::jsonb"
+    requires Jsonb default="'[]'::jsonb"
     download Int
     mtime UTCTime
     Foreign SUser fkAuthor author
@@ -53,18 +55,11 @@ Keyword
     UniqueKeyWord word
     deriving Show
 
-RequireMap
-    snippet SnippetId
-    require SnippetId
-    UniqueRequireMap snippet require
-    deriving Show
-
 Comment json
     snippet SnippetId
     author  Text
     content Text
     mtime UTCTime
-    Foreign SUser fkAuthor author
     deriving Show
 |]
 

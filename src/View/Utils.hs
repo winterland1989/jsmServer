@@ -18,8 +18,9 @@ pageTitle :: Text -> Html ()
 pageTitle t = head_ $ do
         meta_ [charset_ "UTF-8"]
         title_ $ toHtml t
-        link_ [ href_ normalizeCssCDNUrl , rel_ "stylesheet" , type_ "text/css" ]
-        style_ githubCssText
+        link_ [ href_ marxCssCDNUrl , rel_ "stylesheet" , type_ "text/css" ]
+        script_ [src_ aceScriptCdnUrl] ("" :: Text)
+        script_ "ace.config.set('basePath', '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.0')"
 
 topBar :: SessionInfo -> Html ()
 topBar u = div_ [id_ "topBar"] $ do

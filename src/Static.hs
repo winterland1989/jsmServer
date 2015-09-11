@@ -10,38 +10,44 @@ import qualified Data.Text.Encoding as T
 import           CMark
 
 introHtml :: Text
-introHtml = commonmarkToHtml [] $ T.decodeUtf8 $(embedFile "src/Static/intro.md")
+introHtml = commonmarkToHtml [] $ T.decodeUtf8 $(embedFile "src/Static/markdown/intro.md")
 
 enDocHtml :: Text
-enDocHtml = commonmarkToHtml [] $ T.decodeUtf8 $(embedFile "src/Static/enDoc.md")
+enDocHtml = commonmarkToHtml [] $ T.decodeUtf8 $(embedFile "src/Static/markdown/enDoc.md")
 
 cnDocHtml :: Text
-cnDocHtml = commonmarkToHtml [] $ T.decodeUtf8 $(embedFile "src/Static/cnDoc.md")
+cnDocHtml = commonmarkToHtml [] $ T.decodeUtf8 $(embedFile "src/Static/markdown/cnDoc.md")
 
 indexScript :: Text
-indexScript = T.decodeUtf8 $(embedFile "src/Static/index.js")
+indexScript = T.decodeUtf8 $(embedFile "src/Static/dist/index.js")
 
 docScript :: Text
-docScript = T.decodeUtf8 $(embedFile "src/Static/doc.js")
+docScript = T.decodeUtf8 $(embedFile "src/Static/dist/doc.js")
 
 searchScript :: Text
-searchScript = T.decodeUtf8 $(embedFile "src/Static/search.js")
+searchScript = T.decodeUtf8 $(embedFile "src/Static/dist/search.js")
 
 userPageScript :: Text
-userPageScript = T.decodeUtf8 $(embedFile "src/Static/user.js")
+userPageScript = T.decodeUtf8 $(embedFile "src/Static/dist/user.js")
 
 snippetScript :: Text
-snippetScript = T.decodeUtf8 $(embedFile "src/Static/snippet.js")
+snippetScript = T.decodeUtf8 $(embedFile "src/Static/dist/snippet.js")
 
 loginScript :: Text
-loginScript = T.decodeUtf8 $(embedFile "src/Static/login.js")
+loginScript = T.decodeUtf8 $(embedFile "src/Static/dist/login.js")
 
 aceScriptCdnUrl :: Text
-aceScriptCdnUrl = "//cdn.staticfile.org/ace/1.1.3/ace.js"
+aceScriptCdnUrl = "//cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/ace.min.js"
 
-normalizeCssCDNUrl :: Text
-normalizeCssCDNUrl = "//cdn.staticfile.org/normalize/3.0.1/normalize.min.css"
+coffeeScriptCdnUrl :: Text
+coffeeScriptCdnUrl = "//coffeescript.org/extras/coffee-script.js"
+
+liveScriptCdnUrl :: Text
+liveScriptCdnUrl = "//livescript.net/livescript-1.4.0-min.js"
+
+marxCssCDNUrl :: Text
+marxCssCDNUrl = "//cdnjs.cloudflare.com/ajax/libs/marx/1.3.0/marx.min.css"
 
 githubCssText :: Text
-githubCssText = T.decodeUtf8 $(embedFile "src/Static/markdown.css")
+githubCssText = T.decodeUtf8 $(embedFile "src/Static/css/markdown.css")
 

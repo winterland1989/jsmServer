@@ -22,7 +22,7 @@ import           Web.Apiary.Session.ClientSession
 
 
 searchItemPerPage :: Int
-searchItemPerPage = 10
+searchItemPerPage = 100
 
 searchRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 searchRouter = method GET $ do
@@ -32,11 +32,12 @@ searchRouter = method GET $ do
         ([key|sort|] =: pText) .
         ([key|page|] =?!: (0 :: Int)) . action $ do
             (keywords, sort, page) <- [params|keywords, sort, page|]
+            let keywords' = T.toLower keywords
             slength <- runSql $ count
-                [ SnippetKeywords @>. JSON.toJSON (T.words keywords) ]
+                [ SnippetKeywords @>. JSON.toJSON (T.words keywords') ]
             logInfoN $ textShow (T.words keywords)
             snippets <- runSql $ selectList
-                [ SnippetKeywords @>. JSON.toJSON (T.words keywords) ]
+                [ SnippetKeywords @>. JSON.toJSON (T.words keywords') ]
                 [   sortBy sort
                 ,   OffsetBy $ searchItemPerPage * page
                 ,   LimitTo $ searchItemPerPage * (page + 1)
@@ -46,8 +47,7 @@ searchRouter = method GET $ do
 
     [capture|/keywords|] . ([key|word|] =: pText) . action $ do
         word <- param [key|word|]
-        kws <- runSql $ rawSql "SELECT word FROM keyword WHERE word LIKE ?%" []
-        jsonRes $ map (keywordWord . entityVal) kws
+        stop
 
   where
     sortBy sort = case sort of
