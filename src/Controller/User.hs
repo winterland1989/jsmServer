@@ -56,16 +56,15 @@ userRouter = do
                     (pform, profile) <- postForm "profile" (profileForm u') mkFormEnv
                     case profile of
                         Just p  -> do
+                            liftIO $ print profile
                             let newP = newPassword p
                             salt <- liftIO $ getEntropy 32
-                            when (newP /= "") (runSql $ updateWhere
-                                    [ SUserName ==. u']
-                                    [   SUserPwdHash =. hashPassword newP salt
-                                    ,   SUserSalt =. salt
-                                    ,   SUserEmail =. newEmail p
-                                    ,   SUserDesc =. newDesc p
-                                    ]
-                                )
+                            when (newP /= "") (runSql $ updateWhere [ SUserName ==. u']
+                                [ SUserPwdHash =. hashPassword newP salt , SUserSalt =. salt ])
+
+                            runSql $ updateWhere [ SUserName ==. u']
+                                [ SUserEmail =. newEmail p , SUserDesc =. newDesc p ]
+
                             redirect $ "/user/" <> T.encodeUtf8 u'
                         Nothing -> renderLoginPage profilePage pform
 

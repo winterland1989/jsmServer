@@ -40,7 +40,7 @@ Snippet json
     language Text
     version Int
     revision Int
-    deprecated Bool default=True
+    deprecated Bool default=False
     keywords Jsonb default="'[]'::jsonb"
     requires Jsonb default="'[]'::jsonb"
     download Int
