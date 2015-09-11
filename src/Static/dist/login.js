@@ -51,20 +51,17 @@
 	mss = function() {
 	  return {
 	    body: {
-	      width: '480px',
+	      width: '640px',
 	      margin: '0 auto'
 	    },
-	    p: {
-	      fontSize: '1.4em',
-	      textAlign: 'center',
-	      padding: '20px 0'
+	    h1: {
+	      textAlign: 'center'
 	    },
 	    '#loginForm_#registerForm': {
 	      textAlign: 'left',
 	      input_label_textArea: {
 	        display: 'block',
 	        width: '100%',
-	        margin: '8px',
 	        border: 'none'
 	      },
 	      input_textArea: {
@@ -74,10 +71,8 @@
 	        height: '240px'
 	      },
 	      SubmitBtn: {
-	        color: '#fff',
-	        background: '#000',
-	        border: 'none',
-	        padding: '4px 0'
+	        border: '1px solid #444',
+	        margin: '12px 0'
 	      }
 	    }
 	  };

@@ -64,8 +64,6 @@
 
 	controlPanelDom = document.createElement('div');
 
-	controlPanelDom.style.padding = '4px';
-
 	(document.getElementById('snippetInfo')).appendChild(controlPanelDom);
 
 	compiled = false;
@@ -76,11 +74,15 @@
 	  if (!compiled) {
 	    switch (language) {
 	      case 'coffeescript':
-	        editor.setValue(CoffeeScript.compile(sourceCode));
+	        editor.setValue(CoffeeScript.compile(sourceCode, {
+	          bare: true
+	        }), -1);
 	        editor.getSession().setMode(aceMode['javascript']);
 	        break;
 	      case 'livescript':
-	        editor.setValue(LiveScript.compile(sourceCode));
+	        editor.setValue(LiveScript.compile(sourceCode, {
+	          bare: true
+	        }), -1);
 	        editor.getSession().setMode(aceMode['javascript']);
 	    }
 	    return compiled = true;
@@ -114,7 +116,7 @@
 	    border: 'none',
 	    overflowY: 'scroll'
 	  }),
-	  '#snippetInfo_#snippetInfoComment': s.PosAbs()({
+	  '#snippetInfo_#snippetComment': s.PosAbs()({
 	    padding: '16px',
 	    borderLeft: '1px dashed #000',
 	    p: {
@@ -126,19 +128,32 @@
 	    width: '100%',
 	    height: '300px',
 	    CompileToggle: s.Size('100%', '32px')({
+	      margin: '12px 0',
 	      padding: 0,
 	      borderWidth: '1px'
 	    })
 	  },
-	  '#snippetInfoComment': {
+	  '#snippetComment': {
 	    top: '300px',
 	    bottom: 0,
 	    width: '100%',
 	    borderTop: '1px dashed #000',
+	    overflow: 'scroll',
 	    textArea: s.Size('100%', '96px')({}),
 	    input: s.Size('100%', '32px')({
 	      padding: 0,
 	      borderWidth: '1px'
+	    }),
+	    ul: {
+	      marginTop: '12px',
+	      padding: 0
+	    },
+	    li: {
+	      borderTop: '1px dashed #000',
+	      padding: '12px'
+	    },
+	    CommentInfo: s.TextEllip$({
+	      width: '100%'
 	    })
 	  }
 	});

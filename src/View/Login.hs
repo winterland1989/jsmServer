@@ -43,9 +43,9 @@ loginPage lform rform = doctypehtml_ . html_ $ do
     pageTitle  "Login <|> Register | jsm"
     script_ loginScript
     body_ $ do
-        p_ "Welcome back, please login with you credentials:"
+        h1_ "Login with you credentials"
         with (loginView $ fmap toHtml lform) [id_ "loginForm"]
-        p_ "Or add a new user:"
+        h1_ "Or add a new user"
         with (registerView $ fmap toHtml rform) [id_ "registerForm"]
 
 

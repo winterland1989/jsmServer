@@ -45,7 +45,7 @@ snippetPage u cform comments
                         ,   "Download: " <> textShow download
                         ,   "Language: " <> language
                         ]
-                div_ [id_ "snippetInfoComment"] $ do
+                div_ [id_ "snippetComment"] $ do
                     case u of
                         Just _ ->  with (commentView $ fmap toHtml cform) [id_ "commentForm"]
 
@@ -53,7 +53,11 @@ snippetPage u cform comments
 
                     ul_ [id_ "commentList"] $
                         forM_  comments $ \(Comment _ author content mtime) ->
-                            li_ $ toHtml content
+                            li_ $ do
+                                p_ [class_ "CommentInfo"] $ do
+                                    a_ [href_ $ "/user/" <> author] $ toHtml author
+                                    span_ . toHtml $ "@" <> textShow mtime
+                                p_ [class_ "CommentContent"] . toHtml $ content
 
             script_ snippetScript
 

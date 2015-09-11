@@ -51,7 +51,7 @@ profilePage lform rform = doctypehtml_ . html_ $ do
     pageTitle  "Profile <|> Register | jsm"
     script_ loginScript
     body_ $ do
-        p_ "Welcome back, you can update you credentials:"
+        h1_ "Update you credentials"
         with (profileView $ fmap toHtml lform) [id_ "loginForm"]
-        p_ "Or add a new user:"
+        h1_ "Or add a new user"
         with (registerView $ fmap toHtml rform) [id_ "registerForm"]

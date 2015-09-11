@@ -7,7 +7,6 @@
 
 module Controller.Snippet where
 
-import           Control.Monad
 import           Control.Monad.Apiary.Action
 import           Control.Monad.Logger
 import           Controller.Utils
