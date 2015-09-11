@@ -15,7 +15,6 @@ import           View.Utils
 searchPage :: SessionInfo -> Int -> [Snippet] -> Html ()
 searchPage u len ss = doctypehtml_ . html_ $ do
     pageTitle "Introduction | jsm"
-    script_ [src_ aceScriptCdnUrl] ("" :: Text)
     body_ $ do
         topBar u
         div_ [id_ "searchDesc"] $ do

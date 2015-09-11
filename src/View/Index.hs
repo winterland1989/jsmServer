@@ -15,7 +15,6 @@ import           View.Utils
 indexPage :: SessionInfo -> [Snippet] -> Html ()
 indexPage u ss = doctypehtml_ . html_ $ do
     pageTitle "Introduction | jsm"
-    script_ [src_ aceScriptCdnUrl] ("" :: Text)
     body_ $ do
         topBar u
         div_ [id_ "introduction"] $ do
