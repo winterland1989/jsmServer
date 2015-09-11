@@ -5,6 +5,7 @@ module View.Register where
 
 import           Data.Maybe                       (isJust)
 import           Data.Text                        (Text)
+import           Data.Char
 import qualified Data.Text                        as T
 import           Data.Time.Clock                  ()
 import           Database.Persist.Postgresql
@@ -21,14 +22,16 @@ import           Web.Apiary.Session.ClientSession
 registerForm :: Form Text (ActionT '[Session Text IO, Persist, Logger] prms IO) RegisterInfo
 registerForm = RegisterInfo
     <$> "name" .: (check ("Name can't be empty" :: Text) (not . T.null) .
-        check ("Name reserved" :: Text) isNotReserved .
-        checkM ("Name already used" :: Text) isUnqUser) (text Nothing)
-    <*> "password"  .: check ("Can't use empty password" :: Text) (not . T.null) (text Nothing)
-    <*> "email" .: check ("Not a valid email address" :: Text) isValidEmail (text Nothing)
+        check "Sorry, but the name is reserved" isNotReserved .
+        check "Name can only contain [a-zA-Z]" isValidName .
+        checkM "Name already used" isUnqUser) (text Nothing)
+    <*> "password"  .: check "Can't use empty password" (not . T.null) (text Nothing)
+    <*> "email" .: check "Not a valid email address" isValidEmail (text Nothing)
     <*> "desc" .: text Nothing
   where
     isUnqUser name = (runSql . get $ SUserKey name) >>= return . not . isJust
-    isNotReserved name = not $ name `elem` ["jsm"]
+    isNotReserved name = not $ name `elem` ["jsm", "test"]
+    isValidName name = T.all isLetter name
 
 registerView :: Monad m => View (HtmlT m ()) -> HtmlT m ()
 registerView v = form v "/register" $ do

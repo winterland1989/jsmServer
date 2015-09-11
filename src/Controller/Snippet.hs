@@ -150,7 +150,7 @@ snippetRouter = do
                 stop
 
   where
-    validTile title = and $ isLetter <$> T.unpack title
+    validTile title = T.all isLetter title
 
     addIdToSnippetJson id snippet =
         let JSON.Object o = JSON.toJSON snippet
