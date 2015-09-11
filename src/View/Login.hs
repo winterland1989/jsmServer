@@ -15,7 +15,6 @@ import           Web.Apiary                       hiding (Html, string, text)
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
-
 import           View.Register
 import           View.Utils
 import           Controller.Utils (verifyUser)

@@ -115,7 +115,7 @@ jsm install A.js B.js C.coffee ...
     
     imageLoader.js
 
-会产生三个关键词`image`,`Loader`和`imageLoader`（搜索时关键词不区分大小写）,如果希望添加新的关键词，可以在代码的顶层区域中添加：
+会产生三个关键词`image`,`loader`和`imageloader`（搜索时关键词不区分大小写）,如果希望添加新的关键词，可以在代码的顶层区域中添加：
 
 ```js
 //-jsm-keywords: async process ...

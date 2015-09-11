@@ -5,10 +5,8 @@ module View.Doc where
 import           Control.Monad   (forM_)
 import           Data.Monoid
 import           Data.Text       (Text)
-import qualified Data.Text       as T
 import           Data.Time.Clock ()
 import           Lucid
-import           Model
 import           Static
 import           View.Utils
 

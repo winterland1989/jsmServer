@@ -13,19 +13,19 @@ import           Control.Monad.Logger
 import           Controller.Utils
 import qualified Data.Aeson                       as JSON
 import           Data.Char
-import qualified Data.Text.Read as T
-import     qualified     Data.HashMap.Strict              as Map
+import qualified Data.HashMap.Strict              as Map
 import           Data.Maybe
 import           Data.Text                        (Text)
 import qualified Data.Text                        as T
+import qualified Data.Text.Read                   as T
 import           Data.Time.Clock
-import           Data.Vector                      (Vector, forM_)
+import           Data.Vector                      (Vector)
 import qualified Data.Vector                      as V
 import           Database.Persist.Postgresql
 import           Database.Persist.Postgresql.Json
 import           Model
-import           Text.Digestive.View
 import           Text.Digestive.Types
+import           Text.Digestive.View
 import           View.Snippet
 import           Web.Apiary
 import           Web.Apiary.Database.Persist
@@ -70,9 +70,7 @@ snippetRouter = do
                             runSql . insert_ $ Comment sid u content now
                             snippetWithForm Nothing
                         Nothing -> do
-                            liftIO $ print cform
                             snippetWithForm $ Just cform
-
 
                 Nothing -> redirect "/login"
 
@@ -102,13 +100,14 @@ snippetRouter = do
                 (author, password, title, version, keywords, requires, language, content)
                     <- [params|author, password, title, version, keywords, requires, language, content|]
 
-                let keywords' = (JSON.decode keywords) :: Maybe (Vector Text)
+                let keywords' = fmap (fmap (\w -> T.toLower w))(JSON.decode keywords) :: Maybe (Vector Text)
+
                 let requires' = (JSON.decode requires) :: Maybe (Vector Int)
 
                 if validTile title && isJust keywords' && isJust requires'
                     then verifyUser author password >>= \case
                         True -> do
-                            logging "post snippet"
+                            logInfoN "Post snippet"
                             now <- liftIO getCurrentTime
 
                             let keywords'' = Jsonb $ JSON.toJSON $ fromJust keywords'

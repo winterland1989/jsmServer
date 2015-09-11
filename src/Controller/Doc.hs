@@ -7,8 +7,6 @@
 module Controller.Doc where
 
 import           Data.Text                           (Text)
-import           Database.Persist.Postgresql
-import           Model
 import           View.Doc
 import           Controller.Utils
 import           Web.Apiary
