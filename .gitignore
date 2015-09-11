@@ -55,3 +55,6 @@ tags
 
 # apiary
 apiary
+
+# src
+!src/**/dist
