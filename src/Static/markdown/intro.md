@@ -1,6 +1,6 @@
 Jsm is a tool for simple code management, unlike npm or bower, it's designed to be very lightweight. see [doc](/doc/en), [文档](/doc/cn). 
 
-The source code is on github: (jsm-client)[https://github.com/winterland1989/jsm-client.git], (server)[https://github.com/winterland1989/jsmServer.git], got a minute?:
+The source code is on github: [jsm-client](https://github.com/winterland1989/jsm-client.git), [server](https://github.com/winterland1989/jsmServer.git), got a minute?:
 
 ```bash
 # install jsm using npm
