@@ -33,7 +33,7 @@ SUser
     UniqueUser name
     deriving Show
 
-Snippet json
+Snippet json sql=snippet
     author Text
     title Text
     content Text
@@ -49,6 +49,7 @@ Snippet json
     UniqueSnippet author title version
     deriving Show
 
+
 Keyword
     word Text
     Primary word
@@ -63,6 +64,15 @@ Comment json
     deriving Show
 |]
 
+share [mkPersist sqlSettings{ mpsGeneric = False }] [persistLowerCase|
+SnippetURI sql=snippet
+    author Text
+    title Text
+    version Int
+    deprecated Bool
+    requires Jsonb
+  deriving Show
+|]
 
 data RegisterInfo = RegisterInfo {
         registerName     :: Text

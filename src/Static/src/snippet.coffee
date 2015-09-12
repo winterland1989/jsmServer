@@ -8,6 +8,8 @@ editor = ace.edit 'editor'
 editor.setTheme 'ace/theme/tomorrow'
 
 editor.getSession().setMode aceMode[language]
+editor.setOptions({ readOnly: true })
+editor.setKeyboardHandler('ace/keyboard/vim')
 
 controlPanelDom = document.createElement 'div'
 (document.getElementById 'snippetInfo').appendChild controlPanelDom
@@ -25,7 +27,7 @@ toggleCompile = (e) ->
                 editor.getSession().setMode aceMode['javascript']
         compiled = true
     else
-        editor.setValue(sourceCode)
+        editor.setValue(sourceCode, -1)
         editor.getSession().setMode aceMode[language]
         compiled = false
 

@@ -7,12 +7,20 @@ import qualified Data.Text                           as T
 import           Lucid
 import           Data.Monoid
 import           Data.Time.Clock                  ()
+import qualified Data.Vector as V
 import           Static
+import     qualified Data.Aeson as JSON
+import           Database.Persist.Postgresql.Json
 
 type SessionInfo = Maybe Text
 
 textShow :: Show a => a -> Text
 textShow = T.pack . show
+
+keywordsToList :: Jsonb -> [Text]
+keywordsToList keywords =
+    let JSON.Array keywords' = JSON.toJSON keywords
+    in V.toList $ V.map (\(JSON.String w) -> w) keywords'
 
 pageTitle :: Text -> Html ()
 pageTitle t = head_ $ do

@@ -62,6 +62,12 @@
 
 	editor.getSession().setMode(aceMode[language]);
 
+	editor.setOptions({
+	  readOnly: true
+	});
+
+	editor.setKeyboardHandler('ace/keyboard/vim');
+
 	controlPanelDom = document.createElement('div');
 
 	(document.getElementById('snippetInfo')).appendChild(controlPanelDom);
@@ -87,7 +93,7 @@
 	    }
 	    return compiled = true;
 	  } else {
-	    editor.setValue(sourceCode);
+	    editor.setValue(sourceCode, -1);
 	    editor.getSession().setMode(aceMode[language]);
 	    return compiled = false;
 	  }

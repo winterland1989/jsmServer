@@ -16,7 +16,6 @@ import qualified Data.HashMap.Strict              as Map
 import           Data.Maybe
 import           Data.Text                        (Text)
 import qualified Data.Text                        as T
-import qualified Data.Text.Read                   as T
 import           Data.Time.Clock
 import           Data.Vector                      (Vector)
 import qualified Data.Vector                      as V
@@ -37,18 +36,21 @@ snippetWithForm cform = do
     (author, title, version) <- [params|author, title, version|]
     (runSql $ getBy (UniqueSnippet author title version)) >>= \case
         Just (Entity sid snippet) -> do
-            comments <- runSql $ selectList [CommentSnippet ==. sid] [LimitTo 100, Asc CommentMtime]
+            comments <- runSql $ selectList [CommentSnippet ==. sid] [LimitTo 100, Desc CommentMtime]
+            requires <- runSql $ selectList [SnippetURIRequires @>. JSON.toJSON (fromSqlKey sid)] [Desc SnippetURITitle]
             u <- getSession'
+            let comments' = (map entityVal comments)
+            let requires' = (map entityVal requires)
             case cform of
-                Just cform' -> lucidRes $ snippetPage u cform' (map entityVal comments) snippet
+                Just cform' -> lucidRes $
+                    snippetPage u cform' comments' requires' snippet
                 Nothing -> do
                     newCform <- getForm "comment" (commentForm)
                     let newCform' = newCform {viewInput = [
                             (toPath "sid", TextInput $ textShow $ fromSqlKey sid)
                         ]}
-                    lucidRes $ snippetPage u newCform' (map entityVal comments) snippet
+                    lucidRes $ snippetPage u newCform' comments' requires' snippet
         _ -> notFound404Api
-
 
 snippetRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
 snippetRouter = do
@@ -64,9 +66,9 @@ snippetRouter = do
                     let mkFormEnv = (\_-> return $ paramsToEnv commentParams)
                     (cform, comment) <- postForm "comment" commentForm mkFormEnv
                     now <- liftIO getCurrentTime
-                    case comment >>= parseComment of
+                    case comment of
                         Just (sid, content) -> do
-                            runSql . insert_ $ Comment sid u content now
+                            runSql . insert_ $ Comment (toSqlKey sid) u content now
                             snippetWithForm Nothing
                         Nothing -> do
                             snippetWithForm $ Just cform
@@ -154,8 +156,3 @@ snippetRouter = do
     addIdToSnippetJson id snippet =
         let JSON.Object o = JSON.toJSON snippet
         in Map.insert "id" (JSON.toJSON id) o
-
-    parseComment :: (Text, Text) -> Maybe (SnippetId, Text)
-    parseComment (sid, content) = case T.decimal sid of
-        Left _ -> Nothing
-        Right (sid', _) -> Just (toSqlKey sid', content)

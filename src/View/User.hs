@@ -2,9 +2,7 @@
 
 module View.User where
 
-import           Data.Text                           (Text)
 import     qualified      Data.Text as T
-import     qualified Data.Aeson as JSON
 import           Lucid
 import           Data.Monoid
 import           Data.Time.Clock                  ()
@@ -13,7 +11,6 @@ import           Static
 import           CMark
 import View.Utils
 import Control.Monad
-import qualified Data.Vector as V
 
 userPage ::  SessionInfo -> SUser -> [Snippet] -> Html ()
 userPage u u' ss = doctypehtml_ . html_ $ do
@@ -47,8 +44,3 @@ userPage u u' ss = doctypehtml_ . html_ $ do
                             span_ . toHtml $ T.intercalate " " (keywordsToList keywords)
 
         script_ userPageScript
-
-  where
-    keywordsToList keywords =
-        let (JSON.Array keywords') = (JSON.toJSON keywords)
-        in V.toList $ V.map (\(JSON.String w) -> w) keywords'

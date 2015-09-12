@@ -2,9 +2,8 @@
 
 module View.Index where
 
-import           Control.Monad   (forM_)
+import           Control.Monad
 import           Data.Monoid
-import           Data.Text       (Text)
 import qualified Data.Text       as T
 import           Data.Time.Clock ()
 import           Lucid
@@ -28,14 +27,17 @@ indexPage u ss = doctypehtml_ . html_ $ do
                     li_ $ do
                         div_ [class_ "CodeInfo"] $ do
                             a_ [href_ $  "/user/" <> author] $ toHtml author
-                            if revision == 0
-                                then span_ "uploaded"
-                                else span_ "revised"
+                            if deprecated
+                                then span_ "deprecate"
+                                else if revision == 0
+                                    then span_ "uploaded"
+                                    else span_ "revised"
                             a_ [href_ $  "/snippet/" <> author <> "/" <> title <> "/" <> textShow version] $
                                 span_ $ toHtml (title <> textShow version)
                             span_ . toHtml $ "(revision" <> textShow revision <> ")"
                             span_ "@"
                             span_ . toHtml . show $ mtime
+                            when deprecated $ span_ [class_ "snippetDeprecated"] "DEPRECATED"
 
                         div_ [class_ "CodePreview", data_ "language" language] . toHtml $
                             (T.unlines . take 8 . T.lines $ content) <> "..."
