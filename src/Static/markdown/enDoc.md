@@ -5,7 +5,7 @@ Jsm is a very lightweight frontend code manager, it's particularily suitable to 
 
 [Jsm-client](https://github.com/winterland1989/jsm-client) is ready to use but some functions are still W.I.P, any issues are welcomed!
 
-Email: [handong05@meituan.com](mailto:handong05@meituan.com)。
+Email: [handong05@meituan.com](mailto:handong05@meituan.com).
 
 jsm i | install
 ---------------
@@ -100,6 +100,16 @@ And you need to require `jquery2.js` and `myModule2`
 
 + Provide some document with snippet.
 
+jsm u | update
+--------------
+
+Same as install, provide single or multiple entry files, `jsm` will update all snippet they required to latest revision, and warning about DEPRECATED snippets.
+
+jsm d | deprecate
+-----------------
+
+Provide a snippet file path, `jsm` will try to parse author , title and version, and mark the snippet DEPRECATED.
+
 Conventions
 ===========
 
@@ -129,8 +139,3 @@ or in coffee/live:
 ```
 
 `jsm publish` will display all keywords it found.
-
-Other
-=====
-
-Both `update` and `deprecate` are W.I.P...

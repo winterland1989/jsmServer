@@ -1,7 +1,7 @@
 Javascript Snippet Manager使用手册
 =================================
 
-Jsm是一个简单粗暴的前端代码管理工具，它可以帮助你快速安装，发布长度在几百行左右的CommonJs代码片段，除了支持javascrit, jsm还支持coffeescirpt和livescript（在线阅读器可以直接编译），Jsm的服务端和客户端还在持续改进，欢迎使用和反馈:[handong05@meituan.com](mailto:handong05@meituan.com)A
+Jsm是一个简单粗暴的前端代码管理工具，它可以帮助你快速安装，发布长度在几百行左右的CommonJs代码片段，除了支持javascrit, jsm还支持coffeescirpt和livescript（在线阅读器可以直接编译），Jsm的服务端和客户端还在持续改进，欢迎使用和反馈:[handong05@meituan.com](mailto:handong05@meituan.com)。
 
 jsm i | install
 ---------------
@@ -98,6 +98,16 @@ jsm p | publish
 
 + 请在代码中提供必要的文档。
 
+jsm u | update
+--------------
+
+和install用法一致，提供一个或多个入口文件，`jsm`会自动更新所有依赖至最新的revision，并提示作者停止维护的版本。
+
+jsm d | deprecate
+-----------------
+
+提供一个snippet文件路径，`jsm`会自动解析作者、标题和版本，然后把对应的snippet标记为停止维护(DEPRECATED)。
+
 规范和约定
 ==========
 
@@ -127,8 +137,3 @@ jsm p | publish
 ```
 
 `jsm publish`时会提示解析出的关键词。
-
-待续
-====
-
-还有`update`和`deprecate`两个命令没实现，WIP...

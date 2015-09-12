@@ -19,6 +19,7 @@ executable jsmServer
   main-is:              Main.hs
   hs-source-dirs:       src
   build-depends:        base >=4.8 && <4.9
+                    ,   lifted-base
                     ,   apiary
                     ,   apiary-persistent
                     ,   apiary-logger

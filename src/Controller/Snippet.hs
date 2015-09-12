@@ -70,8 +70,7 @@ snippetRouter = do
                         Just (sid, content) -> do
                             runSql . insert_ $ Comment (toSqlKey sid) u content now
                             snippetWithForm Nothing
-                        Nothing -> do
-                            snippetWithForm $ Just cform
+                        Nothing -> snippetWithForm $ Just cform
 
                 Nothing -> redirect "/login"
 
@@ -141,11 +140,18 @@ snippetRouter = do
                 (author, password, title, version) <- [params|author, password, title, version|]
                 verifyUser author password >>= \case
                     True -> do
-                        runSql $ updateWhere [
+                        c <- runSql $ count [
                                 SnippetAuthor ==. author
                             ,   SnippetTitle ==. title
                             ,   SnippetVersion ==. version
                             ]
+                        if c == 0
+                            then status notFound404
+                            else runSql $ updateWhere [
+                                    SnippetAuthor ==. author
+                                ,   SnippetTitle ==. title
+                                ,   SnippetVersion ==. version
+                                ]
                             [ SnippetDeprecated =. True ]
                     False -> status networkAuthenticationRequired511
                 stop
@@ -153,6 +159,6 @@ snippetRouter = do
   where
     validTile title = T.all isLetter title
 
-    addIdToSnippetJson id snippet =
+    addIdToSnippetJson sid snippet =
         let JSON.Object o = JSON.toJSON snippet
-        in Map.insert "id" (JSON.toJSON id) o
+        in Map.insert "id" (JSON.toJSON sid) o

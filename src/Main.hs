@@ -1,18 +1,24 @@
 {-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE QuasiQuotes       #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Main where
 
-import           Controller.Root
+import           Control.Concurrent.Lifted
+import           Control.Monad.Trans.Control
 import           Controller.Doc
+import           Controller.Root
 import           Controller.Search
 import           Controller.Snippet
 import           Controller.User
 import           Controller.Utils
 import           Data.Serialize.Text              ()
+import           Data.Set                         (Set)
+import qualified Data.Set                         as Set
+import           Data.Text                        (Text)
 import qualified Data.Text                        as T
-import qualified Data.Text.Encoding                       as T
+import qualified Data.Text.Encoding               as T
 import           Database.Persist.Postgresql
 import           Model
 import           Network.Wai.Handler.Warp         (run)
@@ -58,8 +64,6 @@ startServer port connStr = do
             snippetRouter
             documentRouter
             notFound404Router
-
-
 
   where
     createKeywordIndex = runSql $
