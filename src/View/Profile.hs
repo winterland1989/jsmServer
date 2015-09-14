@@ -1,11 +1,12 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module View.Profile where
 
 import           Controller.Utils
-import           Data.Text                        (Text)
-import           Data.Time.Clock                  ()
+import           Data.Text                   (Text)
+import           Data.Time.Clock             ()
 import           Lucid
 import           Model
 import           Static
@@ -14,21 +15,16 @@ import           Text.Digestive.Lucid.Html5
 import           Text.Html.Email.Validate
 import           View.Register
 import           View.Utils
-import           Web.Apiary                       hiding (Html, string, text)
+import           Web.Apiary                  hiding (Html, string, text)
 import           Web.Apiary.Database.Persist
-import           Web.Apiary.Logger
-import           Web.Apiary.Session.ClientSession
 
-profileForm :: Text -> Form Text (ActionT '[Session Text IO, Persist, Logger] prms IO) Profile
+profileForm :: (Has SessionExt exts, Has Persist exts)
+    => Text -> Form Text (ActionT exts prms IO) Profile
 profileForm u = Profile
-    <$> "oldPassword"  .: checkM ("Wrong password" :: Text) isOldPassword (text Nothing)
-    <*> "newPassword"  .: (text Nothing)
+    <$> "oldPassword"  .: checkM ("Wrong password" :: Text) (verifyUser u) (text Nothing)
+    <*> "newPassword"  .: text Nothing
     <*> "email" .: check ("Not a valid email address" :: Text) isValidEmail (text Nothing)
     <*> "desc" .: text Nothing
-  where
-    isOldPassword :: Text ->  (ActionT '[Session Text IO, Persist, Logger] prms IO Bool)
-    isOldPassword p = verifyUser u p
-
 
 profileView :: Monad m => View (HtmlT m ()) -> HtmlT m ()
 profileView v = form v "/login" $ do

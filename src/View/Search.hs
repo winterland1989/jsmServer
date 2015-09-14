@@ -4,7 +4,6 @@
 module View.Search where
 
 import           Control.Monad
-import           Control.Loop
 import           Data.Monoid
 import           Data.Text                     (Text)
 import qualified Data.Text                     as T

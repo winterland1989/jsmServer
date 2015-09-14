@@ -1,9 +1,10 @@
 {-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes       #-}
-{-# LANGUAGE TemplateHaskell   #-}
-{-# LANGUAGE TypeOperators   #-}
-{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE TypeFamilies      #-}
+{-# LANGUAGE TypeOperators     #-}
 
 module Controller.Snippet where
 
@@ -11,6 +12,7 @@ import           Control.Monad.Apiary.Action
 import           Control.Monad.Logger
 import           Controller.Utils
 import qualified Data.Aeson                       as JSON
+import           Data.Apiary.Param
 import           Data.Char
 import qualified Data.HashMap.Strict              as Map
 import           Data.Maybe
@@ -22,16 +24,18 @@ import qualified Data.Vector                      as V
 import           Database.Persist.Postgresql
 import           Database.Persist.Postgresql.Json
 import           Model
+import           Network.Routing.Dict
 import           Text.Digestive.Types
 import           Text.Digestive.View
 import           View.Snippet
 import           Web.Apiary
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
-import           Web.Apiary.Session.ClientSession
 
-snippetWithForm :: Maybe (View Text) -> ActionT '[Session Text IO, Persist, Logger]
-    '["version" ':= Int, "title" ':= Text, "author" ':= Text] IO ()
+snippetWithForm :: (Has SessionExt exts, Has Persist exts,
+    Member "author" Text prms, Member "title" Text prms, Member "version" Int prms)
+    => Maybe (View Text)
+    -> ActionT exts prms IO ()
 snippetWithForm cform = do
     (author, title, version) <- [params|author, title, version|]
     (runSql $ getBy (UniqueSnippet author title version)) >>= \case
@@ -45,25 +49,23 @@ snippetWithForm cform = do
                 Just cform' -> lucidRes $
                     snippetPage u cform' comments' requires' snippet
                 Nothing -> do
-                    newCform <- getForm "comment" (commentForm)
+                    newCform <- getForm "comment" commentForm
                     let newCform' = newCform {viewInput = [
                             (toPath "sid", TextInput $ textShow $ fromSqlKey sid)
                         ]}
                     lucidRes $ snippetPage u newCform' comments' requires' snippet
         _ -> notFound404Api
 
-snippetRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
+snippetRouter :: (Has SessionExt exts, Has Persist exts, Has Logger exts)
+    => ApiaryT exts '[] IO m ()
 snippetRouter = do
-
     [capture|/snippet/author::Text/title::Text/version::Int|] $ do
-        method GET . action $ do
-            snippetWithForm Nothing
+
+        method GET . action $ snippetWithForm Nothing
 
         method POST . action $ do
-            commentParams <- getReqBodyParams
             getSession' >>= \case
                 Just u -> do
-                    let mkFormEnv = (\_-> return $ paramsToEnv commentParams)
                     (cform, comment) <- postForm "comment" commentForm mkFormEnv
                     now <- liftIO getCurrentTime
                     case comment of
@@ -100,9 +102,9 @@ snippetRouter = do
                 (author, password, title, version, keywords, requires, language, content)
                     <- [params|author, password, title, version, keywords, requires, language, content|]
 
-                let keywords' = fmap (fmap (\w -> T.toLower w))(JSON.decode keywords) :: Maybe (Vector Text)
+                let keywords' = fmap (fmap T.toLower) (JSON.decode keywords) :: Maybe (Vector Text)
 
-                let requires' = (JSON.decode requires) :: Maybe (Vector Int)
+                let requires' = JSON.decode requires :: Maybe (Vector Int)
 
                 if validTile title && isJust keywords' && isJust requires'
                     then verifyUser author password >>= \case
@@ -157,7 +159,7 @@ snippetRouter = do
                 stop
 
   where
-    validTile title = T.all isLetter title
+    validTile = T.all isLetter
 
     addIdToSnippetJson sid snippet =
         let JSON.Object o = JSON.toJSON snippet

@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Controller.Root where
 
@@ -14,8 +15,8 @@ import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
 
-
-rootRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
+rootRouter :: (Monad m, Has SessionExt exts, Has Persist exts)
+    => ApiaryT exts '[] IO m ()
 rootRouter = root . method GET . action $ do
     ss <- runSql $ selectList [] [ LimitTo 20, Desc SnippetMtime ]
     u <- getSession'

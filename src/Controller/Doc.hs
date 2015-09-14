@@ -1,22 +1,22 @@
 {-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes       #-}
-{-# LANGUAGE TemplateHaskell   #-}
-{-# LANGUAGE LambdaCase        #-}
 
 module Controller.Doc where
 
-import           Data.Text                           (Text)
-import           View.Doc
 import           Controller.Utils
+import           Data.Text                        (Text)
+import           Model
+import           Static
+import           View.Doc
 import           Web.Apiary
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
-import           Static
 
-
-documentRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
+documentRouter :: Has SessionExt exts => ApiaryT exts '[] IO m ()
 documentRouter = [capture|/doc/docName::Text|] . method GET . action $ do
     u <- getSession'
     docName <- param [key|docName|]

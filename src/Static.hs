@@ -4,10 +4,10 @@
 
 module Static where
 
+import           CMark
 import           Data.FileEmbed
 import           Data.Text          (Text)
 import qualified Data.Text.Encoding as T
-import           CMark
 
 introHtml :: Text
 introHtml = commonmarkToHtml [] $ T.decodeUtf8 $(embedFile "src/Static/markdown/intro.md")

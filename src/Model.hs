@@ -17,6 +17,7 @@ import           Data.Text                        (Text)
 import           Data.Time.Clock                  (UTCTime)
 import           Database.Persist.Postgresql.Json (Jsonb)
 import           Database.Persist.TH
+import           Web.Apiary.Session               (Session)
 
 
 share [mkPersist sqlSettings{ mpsGeneric = False },
@@ -92,3 +93,6 @@ data Profile = Profile {
     ,   newEmail    :: Text
     ,   newDesc     :: Text
     } deriving (Show)
+
+type SessionInfo = Maybe Text
+type SessionExt = Session Text IO

@@ -2,17 +2,16 @@
 
 module View.Utils where
 
-import           Data.Text                           (Text)
-import qualified Data.Text                           as T
-import           Lucid
+import qualified Data.Aeson                       as JSON
 import           Data.Monoid
+import           Data.Text                        (Text)
+import qualified Data.Text                        as T
 import           Data.Time.Clock                  ()
-import qualified Data.Vector as V
-import           Static
-import     qualified Data.Aeson as JSON
+import qualified Data.Vector                      as V
 import           Database.Persist.Postgresql.Json
-
-type SessionInfo = Maybe Text
+import           Lucid
+import           Model
+import           Static
 
 textShow :: Show a => a -> Text
 textShow = T.pack . show
@@ -44,4 +43,3 @@ topBar u = div_ [id_ "topBar"] $ do
                 a_ [class_ "LoginOutBtn", href_ "/logout"] "logout"
             Nothing ->
                 a_ [class_ "LoginBtn", href_ "/login"] "login | register"
-

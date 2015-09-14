@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE FlexibleContexts  #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes       #-}
@@ -8,20 +9,17 @@ module View.Snippet where
 import           Control.Monad
 import           Data.Int
 import           Data.Monoid
-import           Text.InterpolatedString.Perl6
-import           Data.Text                        (Text)
-import qualified Data.Text                        as T
-import           Data.Time.Clock                  ()
+import           Data.Text                     (Text)
+import qualified Data.Text                     as T
+import           Data.Time.Clock               ()
 import           Lucid
 import           Model
 import           Static
 import           Text.Digestive
 import           Text.Digestive.Lucid.Html5
+import           Text.InterpolatedString.Perl6
 import           View.Utils
-import           Web.Apiary                       hiding (Html, string, text)
-import           Web.Apiary.Database.Persist
-import           Web.Apiary.Logger
-import           Web.Apiary.Session.ClientSession
+import           Web.Apiary                    hiding (Html, string, text)
 
 snippetPage :: SessionInfo -> View Text -> [Comment] -> [SnippetURI] -> Snippet -> Html ()
 snippetPage u cform comments requires
@@ -55,7 +53,7 @@ snippetPage u cform comments requires
                             li_ $ do
                                 a_ [href_ $ [qc|/snippet/{author}/{title}/{textShow version}|] ]
                                     (toHtml ([qc|{author}/{title}{textShow version}|] :: Text))
-                                when deprecated $ span_ [class_ "snippetDeprecated"] "DEPRECATED"
+                                when deprecated $ span_ [class_ "SnippetDeprecated"] "DEPRECATED"
 
                 div_ [id_ "snippetComment"] $ do
                     case u of
@@ -72,9 +70,10 @@ snippetPage u cform comments requires
 
             script_ snippetScript
 
-commentForm :: Form Text (ActionT '[Session Text IO, Persist, Logger] prms IO) (Int64 ,Text)
-commentForm = ((,))
-    <$> "sid" .: (stringRead "Internal Error" Nothing)
+commentForm :: Has SessionExt exts
+    => Form Text (ActionT exts prms IO) (Int64 ,Text)
+commentForm = (,)
+    <$> "sid" .: stringRead "Internal Error" Nothing
     <*> "comment" .: check "Comment can't be empty" (not . T.null) (text Nothing)
 
 commentView :: Monad m => View (HtmlT m ()) -> HtmlT m ()

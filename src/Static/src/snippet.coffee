@@ -60,6 +60,9 @@ s.tag
         top: 0
         width: '100%'
         height: '300px'
+        SnippetDeprecated:
+            margin: '0 4px'
+            color: '#f48'
         CompileToggle: s.Size('100%', '32px')
             margin: '12px 0'
             padding: 0

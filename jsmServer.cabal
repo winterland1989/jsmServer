@@ -56,7 +56,7 @@ executable jsmServer
                     ,   entropy
                     ,   case-insensitive
                     ,   interpolatedstring-perl6
-                    ,   loop
+                    ,   web-routing
 
   ghc-options:     -Wall -O2 -threaded
   -- hs-source-dirs:      

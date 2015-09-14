@@ -1,6 +1,7 @@
+{-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE DataKinds #-}
 
 module Controller.Utils where
 
@@ -9,22 +10,22 @@ import           Control.Monad.Apiary.Filter.Capture
 import           Crypto.Hash
 import qualified Data.Aeson                          as JSON
 import           Data.ByteString                     (ByteString)
+import qualified Data.CaseInsensitive                as CI
 import           Data.Monoid
 import           Data.Text                           (Text)
 import qualified Data.Text                           as T
 import qualified Data.Text.Encoding                  as T
 import           Database.Persist.Postgresql
+import Text.Digestive.Form.Encoding
 import           Lucid
 import           Model
 import qualified Network.Wai.Parse                   as P
 import           Text.Digestive.Types
 import           View.NotFound
-import           View.Utils                          (SessionInfo)
 import           Web.Apiary                          hiding (Html)
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
-import qualified Data.CaseInsensitive as CI
 
 -- Notfound page, api...
 notFound404Page :: ActionT ext prms IO ()
@@ -47,7 +48,7 @@ textHtmlRes :: Text -> ActionT ext prms IO ()
 textHtmlRes htmlText = contentType "text/html" >> text htmlText
 
 lucidRes :: Html () -> ActionT ext prms IO ()
-lucidRes l = contentType "text/html" >> (lazyBytes $ renderBS l)
+lucidRes l = contentType "text/html" >> lazyBytes (renderBS l)
 
 -- Digestive-functor environment builder
 paramsToEnv :: Monad m => [P.Param] -> Path -> m [FormInput]
@@ -57,6 +58,8 @@ paramsToEnv ((k, v):rest) p =
         else paramsToEnv rest p
 paramsToEnv _ _ = fail "Parameter not found"
 
+mkFormEnv :: FormEncType -> ActionT exts prms IO (Path -> ActionT exts prms IO [FormInput])
+mkFormEnv _ = getReqBodyParams >>= return . paramsToEnv
 
 -- User auth related
 hashPassword :: Text -> ByteString -> Text
@@ -66,15 +69,16 @@ hashPassword pass salt = T.decodeUtf8 . digestToHexByteString . sha256 $
     sha256 :: ByteString -> Digest SHA256
     sha256 = hash
 
-verifyUser :: Text -> Text -> ActionT '[Session Text IO, Persist, Logger] prms IO Bool
-verifyUser name password = do
+verifyUser :: (Has SessionExt exts, Has Persist exts)
+    => Text -> Text -> ActionT exts prms IO Bool
+verifyUser name password =
     (runSql . get $ SUserKey name) >>= \case
         Just (SUser _ salt pwdHash _ _) ->
             return $ pwdHash == hashPassword password salt
         Nothing -> return False
 
 -- Session shortcut
-getSession' :: ActionT '[Session Text IO, Persist, Logger] prms IO SessionInfo
+getSession' :: Has SessionExt exts => ActionT exts prms IO SessionInfo
 getSession' = getSession pText
 
 getHeader :: ByteString -> ActionT exts prms IO (Maybe ByteString)

@@ -1,25 +1,25 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DataKinds         #-}
-{-# LANGUAGE LambdaCase         #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module View.Login where
 
-import           Data.Text                        (Text)
-import qualified Data.Text                        as T
+import           Controller.Utils            (verifyUser)
+import           Data.Text                   (Text)
+import qualified Data.Text                   as T
 import           Lucid
 import           Model
 import           Static
 import           Text.Digestive
 import           Text.Digestive.Lucid.Html5
-import           Web.Apiary                       hiding (Html, string, text)
-import           Web.Apiary.Database.Persist
-import           Web.Apiary.Logger
-import           Web.Apiary.Session.ClientSession
 import           View.Register
 import           View.Utils
-import           Controller.Utils (verifyUser)
+import           Web.Apiary                  hiding (Html, string, text)
+import           Web.Apiary.Database.Persist
 
-loginForm :: Form Text (ActionT '[Session Text IO, Persist, Logger] prms IO) LoginInfo
+loginForm :: (Has SessionExt exts, Has Persist exts)
+    => Form Text (ActionT exts prms IO) LoginInfo
 loginForm = checkM ("Wrong name/password" :: Text) loginCheck(
     LoginInfo
         <$> "name" .: check ("Name can't be empty" :: Text) (not . T.null) (text Nothing)

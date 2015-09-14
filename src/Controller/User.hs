@@ -1,32 +1,32 @@
 {-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes       #-}
-{-# LANGUAGE TemplateHaskell   #-}
-{-# LANGUAGE LambdaCase        #-}
 
 module Controller.User where
 
 import           Control.Monad
-import           Data.Text                           (Text)
-import qualified Data.Text.Encoding                  as T
+import           Control.Monad.Apiary.Action
+import           Controller.Utils
+import           Data.Monoid
+import           Data.Text                        (Text)
+import qualified Data.Text.Encoding               as T
 import           Database.Persist.Postgresql
 import           Model
 import           System.Entropy
 import           Text.Digestive.Types
 import           Text.Digestive.View
 import           View.Login
-import           View.Register
 import           View.Profile
+import           View.Register
 import           View.User
 import           Web.Apiary
-import           Control.Monad.Apiary.Action
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
-import Controller.Utils
-import Data.Monoid
 
-userRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
+userRouter :: (Has SessionExt exts, Has Persist exts) => ApiaryT exts '[] IO m ()
 userRouter = do
 
     [capture|/login|] $ do
@@ -47,10 +47,7 @@ userRouter = do
                     lucidRes $ loginPage lform rform
 
         method POST . action $ do
-            userParams <- getReqBodyParams
             u <- getSession'
-            let mkFormEnv = (\_-> return $ paramsToEnv userParams)
-
             case u of
                 Just u'  -> do
                     (pform, profile) <- postForm "profile" (profileForm u') mkFormEnv
@@ -77,8 +74,7 @@ userRouter = do
                         Nothing -> renderLoginPage loginPage lform
 
     [capture|/register|] . method POST . action $ do
-        userParams <- getReqBodyParams
-        (rform, reg) <- postForm "register" registerForm (\_-> return $ paramsToEnv userParams)
+        (rform, reg) <- postForm "register" registerForm mkFormEnv
         case reg of
             Just r -> do
                 salt <- liftIO $ getEntropy 32

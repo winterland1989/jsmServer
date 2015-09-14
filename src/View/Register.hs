@@ -1,25 +1,26 @@
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DataKinds         #-}
+{-# LANGUAGE FlexibleContexts  #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 module View.Register where
 
-import           Data.Maybe                       (isJust)
-import           Data.Text                        (Text)
+import           Control.Monad
 import           Data.Char
-import qualified Data.Text                        as T
-import           Data.Time.Clock                  ()
+import           Data.Maybe                  (isNothing)
+import           Data.Text                   (Text)
+import qualified Data.Text                   as T
+import           Data.Time.Clock             ()
 import           Database.Persist.Postgresql
 import           Lucid
 import           Model
 import           Text.Digestive
 import           Text.Digestive.Lucid.Html5
 import           Text.Html.Email.Validate
-import           Web.Apiary                       hiding (Html, string, text)
+import           Web.Apiary                  hiding (Html, string, text)
 import           Web.Apiary.Database.Persist
-import           Web.Apiary.Logger
-import           Web.Apiary.Session.ClientSession
 
-registerForm :: Form Text (ActionT '[Session Text IO, Persist, Logger] prms IO) RegisterInfo
+registerForm :: (Has SessionExt exts, Has Persist exts)
+    => Form Text (ActionT exts prms IO) RegisterInfo
 registerForm = RegisterInfo
     <$> "name" .: (check ("Name can't be empty" :: Text) (not . T.null) .
         check "Sorry, but the name is reserved" isNotReserved .
@@ -29,9 +30,9 @@ registerForm = RegisterInfo
     <*> "email" .: check "Not a valid email address" isValidEmail (text Nothing)
     <*> "desc" .: text Nothing
   where
-    isUnqUser name = (runSql . get $ SUserKey name) >>= return . not . isJust
-    isNotReserved name = not $ name `elem` ["jsm", "test"]
-    isValidName name = T.all isLetter name
+    isUnqUser name = liftM isNothing (runSql . get $ SUserKey name)
+    isNotReserved name = name `notElem` ["jsm", "test"]
+    isValidName = T.all isLetter
 
 registerView :: Monad m => View (HtmlT m ()) -> HtmlT m ()
 registerView v = form v "/register" $ do

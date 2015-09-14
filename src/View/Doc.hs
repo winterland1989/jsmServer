@@ -7,6 +7,7 @@ import           Data.Monoid
 import           Data.Text       (Text)
 import           Data.Time.Clock ()
 import           Lucid
+import           Model
 import           Static
 import           View.Utils
 

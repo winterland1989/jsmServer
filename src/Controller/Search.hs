@@ -3,6 +3,7 @@
 {-# LANGUAGE QuasiQuotes       #-}
 {-# LANGUAGE TemplateHaskell   #-}
 {-# LANGUAGE LambdaCase        #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Controller.Search where
 
@@ -19,7 +20,6 @@ import           View.Search
 import           Web.Apiary
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
-import           Web.Apiary.Session.ClientSession
 
 
 searchItemPerPage :: Int
@@ -28,7 +28,8 @@ searchItemPerPage = 100
 completeLimit :: Int
 completeLimit = 20
 
-searchRouter :: Monad m => ApiaryT '[Session Text IO, Persist, Logger] '[] IO m ()
+searchRouter :: (Has SessionExt exts, Has Persist exts, Has Logger exts)
+    => ApiaryT exts '[] IO m ()
 searchRouter = method GET $ do
 
     [capture|/search|] .
