@@ -4,9 +4,10 @@
 module View.Search where
 
 import           Control.Monad
+import           Control.Loop
 import           Data.Monoid
-import           Data.Text (Text)
-import qualified Data.Text as T
+import           Data.Text                     (Text)
+import qualified Data.Text                     as T
 import           Data.Time.Clock               ()
 import           Lucid
 import           Model
@@ -15,15 +16,15 @@ import           Text.InterpolatedString.Perl6
 import           View.Utils
 
 searchPage :: SessionInfo -> Int -> [Snippet] -> Html ()
-searchPage u len ss = doctypehtml_ . html_ $ do
+searchPage u itermPerPage ss = doctypehtml_ . html_ $ do
     pageTitle "Introduction | jsm"
     body_ $ do
         topBar u
         div_ [id_ "searchDesc"] $ h1_ "Search for:"
         div_ [id_ "searchList"] $
             ul_ $
-                forM_ ss $ \(Snippet
-                    author title content language version revision deprecated keywords _  _ mtime) ->
+                forM_ (zip ss [1..itermPerPage]) $ \(Snippet
+                    author title content language version revision deprecated keywords _  _ mtime, _) ->
                     li_ $ do
                         div_ [class_ "CodeInfo"] $ do
                             a_ [href_ $  "/user/" <> author] $ toHtml author

@@ -7,10 +7,8 @@ module Controller.Utils where
 import           Control.Monad.Apiary.Action
 import           Control.Monad.Apiary.Filter.Capture
 import           Crypto.Hash
-import           Data.Aeson                          (FromJSON, ToJSON)
 import qualified Data.Aeson                          as JSON
 import           Data.ByteString                     (ByteString)
-import           Data.ByteString.Lazy                (fromStrict)
 import           Data.Monoid
 import           Data.Text                           (Text)
 import qualified Data.Text                           as T

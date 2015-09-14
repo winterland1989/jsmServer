@@ -169,23 +169,146 @@
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var fireSearch, m, s, search;
+	var complete, completeList, currentHref, debounceTime, debounceTimerId, inputContent, m, onInputInput, onInputKeyDown, s, search, searchParams, selectedIndex;
 
 	m = __webpack_require__(2);
 
 	s = __webpack_require__(4);
 
-	fireSearch = function(e) {
-	  if (e.keyCode === 13) {
-	    return window.location = '/search?sort=mtime&page=0&keywords=' + e.target.value;
+	currentHref = window.location.href;
+
+	searchParams = m.route.parseQueryString(decodeURIComponent(currentHref.substr(currentHref.indexOf('?') + 1)));
+
+	selectedIndex = 0;
+
+	inputContent = searchParams.keywords != null ? searchParams.keywords : '';
+
+	debounceTimerId = void 0;
+
+	debounceTime = 200;
+
+	onInputKeyDown = function(e) {
+	  switch (e.keyCode || e.which) {
+	    case 9:
+	      if (completeList.length) {
+	        if (e.shiftKey === true) {
+	          if (selectedIndex > 0) {
+	            selectedIndex--;
+	          }
+	        } else {
+	          if (selectedIndex < completeList.length) {
+	            selectedIndex++;
+	          }
+	          if (selectedIndex === completeList.length) {
+	            selectedIndex = 0;
+	          }
+	        }
+	        inputContent = completeList[selectedIndex];
+	      }
+	      return false;
+	    case 37:
+	    case 38:
+	      if (completeList.length) {
+	        if (selectedIndex >= 0) {
+	          selectedIndex--;
+	        }
+	        if (selectedIndex === -1) {
+	          selectedIndex = completeList.length - 1;
+	        }
+	        inputContent = completeList[selectedIndex];
+	      }
+	      return false;
+	    case 39:
+	    case 40:
+	      if (completeList.length) {
+	        if (selectedIndex < completeList.length) {
+	          selectedIndex++;
+	        }
+	        if (selectedIndex === completeList.length) {
+	          selectedIndex = 0;
+	        }
+	        inputContent = completeList[selectedIndex];
+	      }
+	      return false;
+	    case 13:
+	      if (inputContent !== '') {
+	        window.location = '/search?sort=mtime&page=0&keywords=' + e.target.value;
+	      }
+	      return false;
+	    default:
+	      return true;
+	  }
+	};
+
+	onInputInput = function(e) {
+	  selectedIndex = 0;
+	  inputContent = e.target.value;
+	  if (debounceTimerId) {
+	    clearTimeout(debounceTimerId);
+	  }
+	  return debounceTimerId = setTimeout(function() {
+	    return complete(e.target);
+	  }, debounceTime);
+	};
+
+	completeList = [];
+
+	complete = function(inputDom) {
+	  var inputPre, inputWords, lastWord;
+	  inputWords = inputContent.split(' ');
+	  lastWord = inputWords.pop();
+	  inputPre = inputWords.join(' ');
+	  if (lastWord !== '') {
+	    return m.request({
+	      url: '/keywords?predict=' + lastWord,
+	      method: 'GET',
+	      background: true
+	    }).then(function(keywords) {
+	      var word;
+	      completeList = (function() {
+	        var i, len, results;
+	        results = [];
+	        for (i = 0, len = keywords.length; i < len; i++) {
+	          word = keywords[i];
+	          if (inputPre === '') {
+	            results.push(word);
+	          } else {
+	            results.push(inputPre + ' ' + word);
+	          }
+	        }
+	        return results;
+	      })();
+	      completeList.unshift(inputContent);
+	      return m.redraw();
+	    });
+	  } else {
+	    completeList = [];
+	    return m.redraw();
 	  }
 	};
 
 	search = {
 	  view: function() {
+	    var index, keyword;
 	    return m('.Search', m('span.SearchLabel', 'search:'), m('.SimpleAutoComplete', m('input', {
-	      onkeyup: fireSearch
-	    }), m('.Suggetion')));
+	      oninput: onInputInput,
+	      onkeydown: onInputKeyDown,
+	      value: inputContent
+	    }), m('ul.Suggestion', (function() {
+	      var i, len, results;
+	      results = [];
+	      for (index = i = 0, len = completeList.length; i < len; index = ++i) {
+	        keyword = completeList[index];
+	        if (index > 0) {
+	          results.push(m('li', {
+	            className: index === selectedIndex ? 'Selected' : ''
+	          }, keyword));
+	        } else {
+	          results.push(void 0);
+	        }
+	      }
+	      return results;
+	    })())));
 	  }
 	};
 
@@ -200,18 +323,31 @@
 	      SearchLabel: {
 	        margin: '0 4px'
 	      },
-	      SimpleAutoComplete: {
+	      SimpleAutoComplete: s.PosRel(0, 0)({
+	        zIndex: 999,
 	        display: 'inline-block',
 	        span_input: {
 	          margin: '0 4px'
 	        },
 	        input: s.LineSize('48px', '18px')({
 	          width: '480px',
+	          margin: 0,
+	          padding: '0 8px',
 	          border: 'none',
 	          background: '#555',
 	          color: '#fff'
+	        }),
+	        Suggestion: s.PosAbs('48px', 0)({
+	          li: s.LineSize('48px', '18px')({
+	            width: '480px',
+	            padding: '0 8px',
+	            background: '#555'
+	          }),
+	          Selected: {
+	            background: '#000'
+	          }
 	        })
-	      }
+	      })
 	    }
 	  }))),
 	  '#indexLink': {
