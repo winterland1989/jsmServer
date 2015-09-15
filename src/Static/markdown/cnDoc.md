@@ -101,12 +101,28 @@ jsm p | publish
 jsm u | update
 --------------
 
-和install用法一致，提供一个或多个入口文件，`jsm`会自动更新所有依赖至最新的revision，并提示作者停止维护的版本。
+提供一个或多个入口文件，`jsm`会自动更新所有依赖至最新的revision，并提示作者停止维护的版本。
 
 jsm d | deprecate
 -----------------
 
 提供一个snippet文件路径，`jsm`会自动解析作者、标题和版本，然后把对应的snippet标记为停止维护(DEPRECATED)。
+
+jsm s | server
+--------------
+
+提供一个入口文件和一个端口号（默认8080），`jsm`会自动启动一个测试服务器，提供一个包含打包好的入口文件的空HTML页面。同时使用35729端口实现自动刷新。
+
+jsm w | webpack
+---------------
+
+提供一个或多个入口文件，`jsm`会自动产生一个简单的[webpack](http://webpack.github.io/)配置文件`webpack.config.js`：
+
+    jsm i pageA.js pageB.js
+    jsm w
+    webpack
+
+默认编译生成`pageA.bundle.js`、`pageB.bundle.js`。
 
 规范和约定
 ==========

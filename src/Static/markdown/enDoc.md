@@ -110,6 +110,22 @@ jsm d | deprecate
 
 Provide a snippet file path, `jsm` will try to parse author , title and version, and mark the snippet DEPRECATED.
 
+jsm s | server
+--------------
+
+Provide an entry file and a port number(default = 8080), `jsm` will start a test server, serving an empty HTML page with bundled entry file. The server also use port 35729 to do live-reload.
+
+jsm w | webpack
+---------------
+
+Provide your entry files, `jsm` will generate a minimium [webpack](http://webpack.github.io/) config file `webpack.config.js` with javascrit, coffeescirpt and livescript support.
+
+    jsm i pageA.js pageB.js
+    jsm w
+    webpack
+
+Will bundle `pageA.bundle.js`, `pageB.bundle.js`.
+
 Conventions
 ===========
 
