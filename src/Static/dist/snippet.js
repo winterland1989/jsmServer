@@ -125,14 +125,13 @@
 	    overflowY: 'scroll'
 	  }),
 	  '#snippetInfo_#snippetComment': {
+	    width: '100%',
 	    padding: '16px',
 	    p: {
 	      margin: '0'
 	    }
 	  },
 	  '#snippetInfo': {
-	    top: 0,
-	    width: '100%',
 	    SnippetDeprecated: {
 	      margin: '0 4px',
 	      color: '#f48'
@@ -144,10 +143,7 @@
 	    })
 	  },
 	  '#snippetComment': {
-	    bottom: 0,
-	    width: '100%',
 	    borderTop: '1px dashed #000',
-	    overflow: 'scroll',
 	    textArea: s.Size('100%', '96px')({}),
 	    input: s.Size('100%', '32px')({
 	      padding: 0,
