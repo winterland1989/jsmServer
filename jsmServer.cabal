@@ -39,6 +39,8 @@ executable jsmServer
                     ,   unordered-containers
                     ,   bytestring
                     ,   text
+                    ,   text-show 
+                    ,   text-show-instances
                     ,   vector
                     ,   time
                     ,   file-embed

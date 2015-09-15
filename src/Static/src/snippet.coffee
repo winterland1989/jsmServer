@@ -43,23 +43,22 @@ m.mount controlPanelDom, controlPanel
 s.tag
     html_body: s.Size('100%', '100%') s.PosRel(0,0) {}
 
-    '#editor': s.PosAbs('48px', '400px', 0, 0) {}
+    '#editor': s.PosAbs('48px', '360px', 0, 0)
+        borderRight: '1px dashed #000'
 
     '#sideBar': s.PosAbs('40px', 0, 0)
-        width: '400px'
+        width: '360px'
         padding: 0
         border: 'none'
         overflowY: 'scroll'
 
-    '#snippetInfo_#snippetComment': s.PosAbs()
+    '#snippetInfo_#snippetComment':
         padding: '16px'
-        borderLeft: '1px dashed #000'
         p: margin: '0'
 
     '#snippetInfo':
         top: 0
         width: '100%'
-        height: '300px'
         SnippetDeprecated:
             margin: '0 4px'
             color: '#f48'
@@ -69,7 +68,6 @@ s.tag
             borderWidth: '1px'
 
     '#snippetComment':
-        top: '300px'
         bottom: 0
         width: '100%'
         borderTop: '1px dashed #000'
@@ -86,6 +84,7 @@ s.tag
         li:
             borderTop: '1px dashed #000'
             padding: '12px'
+            listStyle: 'none'
 
         CommentInfo: s.TextEllip$
             width: '100%'

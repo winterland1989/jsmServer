@@ -16,11 +16,13 @@ import           Data.Text                           (Text)
 import qualified Data.Text                           as T
 import qualified Data.Text.Encoding                  as T
 import           Database.Persist.Postgresql
-import Text.Digestive.Form.Encoding
 import           Lucid
 import           Model
 import qualified Network.Wai.Parse                   as P
+import           Text.Digestive.Form.Encoding
 import           Text.Digestive.Types
+import           TextShow                            as T
+import           TextShow.Instances
 import           View.NotFound
 import           Web.Apiary                          hiding (Html)
 import           Web.Apiary.Database.Persist
@@ -87,5 +89,5 @@ getHeader name = do
     return $ lookup (CI.mk name) headers
 
 -- others
-textShow :: Show a => a -> Text
-textShow = T.pack . show
+textShow :: TextShow a => a -> Text
+textShow = showt

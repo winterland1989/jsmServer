@@ -14,7 +14,6 @@ module.exports = {
     },
     module: {
         loaders: [
-            { test: /\.css$/, loader: "style!css" },
             { test: /\.coffee$/, loader: "coffee-loader" },
             { test: /\.(coffee\.md|litcoffee)$/, loader: "coffee-loader?literate" }
         ]
