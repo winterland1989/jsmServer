@@ -1,7 +1,7 @@
 Javascript Snippet Manager使用手册
 =================================
 
-Jsm是一个简单粗暴的前端代码管理工具，它可以帮助你快速安装，发布长度在几百行左右的CommonJs代码片段，除了支持Javascript, jsm还支持coffeescirpt, livescript和jsx, 在线阅读器可以直接编译方便阅读(babel赞不支持)，欢迎使用和反馈:)
+Jsm是一个简单粗暴的前端代码管理工具，它可以帮助你快速安装，发布长度在几百行左右的CommonJs代码片段，除了支持Javascript, jsm还支持coffeescirpt, livescript和jsx, 在线阅读器可以直接编译coffeescirpt和livescript以方便阅读，欢迎使用和反馈:)
 
 Email:[handong05@meituan.com](mailto:handong05@meituan.com)
 
