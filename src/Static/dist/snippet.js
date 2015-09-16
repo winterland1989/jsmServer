@@ -156,7 +156,12 @@
 	    li: {
 	      borderTop: '1px dashed #000',
 	      padding: '12px',
-	      listStyle: 'none'
+	      listStyle: 'none',
+	      CommentContent: {
+	        background: '#eee',
+	        padding: '12px',
+	        margin: '12px 0'
+	      }
 	    },
 	    CommentInfo: s.TextEllip$({
 	      width: '100%'

@@ -1,9 +1,7 @@
 Javascript Snippet Manager
 ==========================
 
-Jsm is a very lightweight frontend code manager, it's particularily suitable to install and publish short code snippet. Beside Javascript, jsm online viewer support coffeescirpt and livescript with compile function.
-
-[Jsm-client](https://github.com/winterland1989/jsm-client) is ready to use but some functions are still W.I.P, any issues are welcomed!
+Jsm is a very lightweight frontend code manager, it's particularily suitable to install and publish short code snippet. Beside Javascript, jsm support coffeescirpt, livescript and jsx.
 
 Email: [handong05@meituan.com](mailto:handong05@meituan.com).
 
@@ -142,7 +140,7 @@ Conventions
     
     imageLoader.js
 
-Will get `image`, `Loader` and `imageLoader`(searching is case-insensitive), if you want to add more, use:
+Will get `image`, `Loader` and `imageLoader`(searching is case-insensitive), if you want to add more, add a comment to the top level of the code:
 
 ```js
 //-jsm-keywords: async process ...
