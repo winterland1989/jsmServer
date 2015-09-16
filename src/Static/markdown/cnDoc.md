@@ -33,9 +33,9 @@ require的时候写死作者名和大版本，但从来不要写文件后缀，�
 
     require('./jsm/base/lodash3')
     require('./jsm/base/zepto1')
-    require('./jsm/winter/mss2')
+    require('./jsm/winter/mss1')
     
-会分别从base账户下找到lodash3和zepto1，winter账户下找到mss2，然后安装到对应文件夹。
+会分别从base账户下找到lodash3和zepto1，winter账户下找到mss1，然后安装到对应文件夹。
 
 + 如果有多个入口文件怎么办？
 
@@ -119,7 +119,7 @@ jsm w | webpack
 提供一个或多个入口文件，`jsm`会自动产生一个简单的[webpack](http://webpack.github.io/)配置文件`webpack.config.js`：
 
     jsm i pageA.js pageB.js
-    jsm w
+    jsm w pageA.js pageB.js
     webpack
 
 默认编译生成`pageA.bundle.js`、`pageB.bundle.js`。
@@ -153,3 +153,11 @@ jsm w | webpack
 ```
 
 `jsm publish`时会提示解析出的关键词。
+
++ 根据需求安装的snippet可以跟随项目的版本管理，也可以通过添加`.gitignore`忽略`jsm`文件夹，如果希望提供安装脚本，使用普通的shell脚本即可，例如：
+
+```shell
+!#/bin/bash
+
+find ./main -maxdepth 1 -name '*.coffee' | xargs jsm u
+```

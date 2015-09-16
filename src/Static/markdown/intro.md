@@ -10,7 +10,8 @@ npm install -g https://github.com/winterland1989/jsm-client.git
 # for example: _ = require('./jsm/base/lodash3')
 vim index.js
 
-# use jsm download snippet for index.js file now.
+# use jsm download snippet for index.js file, and start a testing server.
 jsm install index.js
+jsm server index.js
 
 ```

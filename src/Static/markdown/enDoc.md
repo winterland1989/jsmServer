@@ -35,9 +35,9 @@ Version and namespace are directly written into your code, never add file extens
 
     require('./jsm/base/lodash3')
     require('./jsm/base/zepto1')
-    require('./jsm/winter/mss2')
+    require('./jsm/winter/mss1')
     
-Jsm will looking for `lodash3` and `zepto1` from user `base`，`mss2` from user `winter`, and place them accordingly.
+Jsm will looking for `lodash3` and `zepto1` from user `base`，`mss1` from user `winter`, and place them accordingly.
 
 + What if there're more than one entry?
 
@@ -121,7 +121,7 @@ jsm w | webpack
 Provide your entry files, `jsm` will generate a minimium [webpack](http://webpack.github.io/) config file `webpack.config.js` with javascrit, coffeescirpt and livescript support.
 
     jsm i pageA.js pageB.js
-    jsm w
+    jsm w pageA.js pageB.js
     webpack
 
 Will bundle `pageA.bundle.js`, `pageB.bundle.js`.
@@ -155,3 +155,11 @@ or in coffee/live:
 ```
 
 `jsm publish` will display all keywords it found.
+
++ You can add all snippets to you git(or other VCS), or ignore them by add `.gitignore`, if you want an automatic install command, write a shell script, for example:
+
+```shell
+!#/bin/bash
+
+find ./main -maxdepth 1 -name '*.coffee' | xargs jsm u
+```
