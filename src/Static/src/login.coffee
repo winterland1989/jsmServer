@@ -2,8 +2,9 @@ s = require "./jsm/base/mss"
 
 mss = ->
     body:
-        width: '640px'
+        maxWidth: '640px'
         margin: '0 auto'
+        fontSize: '14px'
 
     h1: textAlign: 'center'
 

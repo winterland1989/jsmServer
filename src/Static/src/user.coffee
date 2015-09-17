@@ -4,7 +4,7 @@ s = require './jsm/base/mss'
 
 s.tag
     '#userDesc_#userList':
-        width: '960px'
+        maxWidth: '960px'
         margin: '0 auto'
 
     '#userList':

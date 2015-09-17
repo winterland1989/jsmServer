@@ -83,7 +83,7 @@
 	    textAlign: 'center'
 	  },
 	  '#searchList_#searchDesc': {
-	    width: '960px',
+	    maxWidth: '960px',
 	    margin: '0 auto'
 	  },
 	  '#searchDesc': {

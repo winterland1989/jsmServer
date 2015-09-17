@@ -136,6 +136,24 @@ Conventions
 
 + The default version is `0` even you don't add a version number to file , version `0` marked a testing snippet with possible API changes, so think before you require a version `0` snippet, ready to modify your code while the author are working on it.
 
++ `jsm` won't distinguish es3/5/6 files，you need to use `jsx` extension to use bable transcompiler.
+
++ After modified other's code, it's highly recommended to move them to your own namespace, if you do need lock version, add following to the top scope of your file:
+
+```js
+//-jsm-update: false
+```
+
+coffee/live:
+
+```coffee
+#-jsm-update: false
+```
+
+After that, `jsm update` will ignore the marked file.
+
++ It's highly recommended to add `jsm` folder to your VCS, with help of `-jsm-update`, you can easily achieve portable build.
+
 + `jsm` will parse filename to get keyword for searching:
     
     imageLoader.js
@@ -153,11 +171,3 @@ or in coffee/live:
 ```
 
 `jsm publish` will display all keywords it found.
-
-+ You can add all snippets to you git(or other VCS), or ignore them by add `.gitignore`, if you want an automatic install command, write a shell script, for example:
-
-```shell
-!#/bin/bash
-
-find ./main -maxdepth 1 -name '*.coffee' | xargs jsm u
-```

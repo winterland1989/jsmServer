@@ -138,6 +138,24 @@ jsm w | webpack
 
 + jsm中默认的版本号是`0`（即使发布时文件名称不包含版本），`0`版本可以用作快速迭代，允许API任意改动，所以当你依赖了一个版本号是`0`的snippet时，做好大幅修改的准备，因为作者需要时间完善它！
 
++ `jsm`不会处理使用es6语法的js文件，如果需要发布使用bable编译的es6文件，把后缀名设置成`jsx`即可。
+
++ 改动了别人的代码最好移动到自己的namespace下，如果出于锁定版本等其他原因，不希望自动更新某个文件，在文件顶部添加:
+
+```js
+//-jsm-update: false
+```
+
+或者coffee/live中
+
+```coffee
+#-jsm-update: false
+```
+
+即可，`jsm update`会识别到标记的文件并跳过。
+
++ 推荐把`jsm`文件夹添加至项目的版本管理，配合`-jsm-update`，可以保证完全可重复的build过程。
+
 + `jsm`默认解析snippet的名称用来作为搜索的关键词，例如
     
     imageLoader.js
@@ -156,10 +174,4 @@ jsm w | webpack
 
 `jsm publish`时会提示解析出的关键词。
 
-+ 根据需求安装的snippet可以跟随项目的版本管理，也可以通过添加`.gitignore`忽略`jsm`文件夹，如果希望提供安装脚本，使用普通的shell脚本即可，例如：
 
-```shell
-!#/bin/bash
-
-find ./main -maxdepth 1 -name '*.coffee' | xargs jsm u
-```

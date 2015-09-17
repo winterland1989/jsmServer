@@ -18,7 +18,7 @@ s.tag
     h1:
         textAlign: 'center'
     '#latestList_#introduction':
-        width: '960px'
+        maxWidth: '960px'
         margin: '0 auto'
     '#latestList':
         ul:

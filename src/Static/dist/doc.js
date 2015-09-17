@@ -54,7 +54,7 @@
 
 	s.tag({
 	  '#document': {
-	    width: '960px',
+	    maxWidth: '960px',
 	    margin: '0 auto'
 	  }
 	});
