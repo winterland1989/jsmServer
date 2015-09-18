@@ -1,6 +1,9 @@
 h1{
     text-align: center;
 }
+a{
+    color: #f48;
+}
 .Content{
     max-width: 960px;
     margin: 0 auto;
@@ -31,7 +34,7 @@ h1{
 .CodeInfo a{
     text-decoration: none;
     padding: 4px;
-    color: red;
+    color: #f48;
 }
 .CodePreview{
     height: 150px;
