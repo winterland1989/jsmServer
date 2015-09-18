@@ -22,11 +22,9 @@ import qualified Network.Wai.Parse                   as P
 import           Text.Digestive.Form.Encoding
 import           Text.Digestive.Types
 import           TextShow                            as T
-import           TextShow.Instances
 import           View.NotFound
 import           Web.Apiary                          hiding (Html)
 import           Web.Apiary.Database.Persist
-import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
 
 -- Notfound page, api...
@@ -44,7 +42,7 @@ notFound404Router = anyPath $ action notFound404Page
 
 -- Http respond helper
 jsonRes :: JSON.ToJSON a => a -> ActionT ext prms IO ()
-jsonRes = lazyBytes . JSON.encode
+jsonRes a = contentType "application/json" >> (lazyBytes . JSON.encode) a
 
 textHtmlRes :: Text -> ActionT ext prms IO ()
 textHtmlRes htmlText = contentType "text/html" >> text htmlText

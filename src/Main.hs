@@ -10,8 +10,8 @@ import           Controller.Search
 import           Controller.Snippet
 import           Controller.User
 import           Controller.Utils
+
 import           Data.Serialize.Text              ()
-import           Data.Text                        (Text)
 import qualified Data.Text                        as T
 import qualified Data.Text.Encoding               as T
 import           Database.Persist.Postgresql

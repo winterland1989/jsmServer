@@ -7,6 +7,7 @@
 module Controller.User where
 
 import           Control.Monad
+import           Control.Monad.Logger
 import           Control.Monad.Apiary.Action
 import           Controller.Utils
 import           Data.Monoid
@@ -17,6 +18,7 @@ import           Model
 import           System.Entropy
 import           Text.Digestive.Types
 import           Text.Digestive.View
+import           Text.InterpolatedString.Perl6
 import           View.Login
 import           View.Profile
 import           View.Register
@@ -26,7 +28,8 @@ import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
 import           Web.Apiary.Session.ClientSession
 
-userRouter :: (Has SessionExt exts, Has Persist exts) => ApiaryT exts '[] IO m ()
+userRouter :: (Has SessionExt exts, Has Persist exts, Has Logger exts)
+    => ApiaryT exts '[] IO m ()
 userRouter = do
 
     [capture|/login|] $ do
@@ -62,6 +65,7 @@ userRouter = do
                             runSql $ updateWhere [ SUserName ==. u']
                                 [ SUserEmail =. newEmail p , SUserDesc =. newDesc p ]
 
+                            logInfoN $ [qc|Update user {u'}|]
                             redirect $ "/user/" <> T.encodeUtf8 u'
                         Nothing -> renderLoginPage profilePage pform
 
@@ -69,23 +73,27 @@ userRouter = do
                     (lform, linfo) <- postForm "login" loginForm mkFormEnv
                     case linfo of
                         Just l  -> do
-                            setSession pText $ loginName l
+                            let uname = loginName l
+                            logInfoN $ [qc|Login user {uname}|]
+                            setSession pText uname
                             redirect "/"
-                        Nothing -> renderLoginPage loginPage lform
+                        Nothing ->
+                            renderLoginPage loginPage lform
 
     [capture|/register|] . method POST . action $ do
         (rform, reg) <- postForm "register" registerForm mkFormEnv
         case reg of
             Just r -> do
                 salt <- liftIO $ getEntropy 32
+                let uname = registerName r
                 _ <- runSql . insert $ SUser
-                    (registerName r)
+                    uname
                     salt
                     (hashPassword (registerPassword r) salt)
                     (registerEmail r)
                     (registerDesc r)
-
-                setSession pText $ registerName r
+                logInfoN $ [qc|Create user {uname}|]
+                setSession pText uname
                 redirect "/"
             Nothing -> do
                 lform <- getForm "login" loginForm
@@ -96,7 +104,7 @@ userRouter = do
     [capture|/user/user::Text|] . method GET . action $ do
         user <- param [key|user|]
         ss <- runSql $ selectList [SnippetAuthor ==. user] [Desc SnippetMtime]
-        (runSql $ get (SUserKey user)) >>= \case
+        (runSql . get) (SUserKey user) >>= \case
             Just u' -> do
                 u <- getSession'
                 lucidRes $ userPage u u'

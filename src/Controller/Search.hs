@@ -1,7 +1,6 @@
 {-# LANGUAGE DataKinds         #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes       #-}
-{-# LANGUAGE TemplateHaskell   #-}
 {-# LANGUAGE LambdaCase        #-}
 {-# LANGUAGE FlexibleContexts #-}
 
@@ -34,7 +33,7 @@ searchRouter = method GET $ do
 
     [capture|/search|] .
         ([key|keywords|] =: pText) .
-        ([key|sort|] =: pText) .
+        ([key|sort|] =?!: ( "mtime" :: Text)) .
         ([key|page|] =?!: (0 :: Int)) . action $ do
             (keywords, sort, page) <- [params|keywords, sort, page|]
             let keywords' = T.toLower keywords
@@ -48,7 +47,8 @@ searchRouter = method GET $ do
             u <- getSession'
             lucidRes $ searchPage u searchItemPerPage (map entityVal snippets)
 
-    [capture|/keywords|] . ([key|predict|] =: pText) . action $ do
+    [capture|/keywords|] . ([key|predict|] ?? "Given predict" =: pText) .
+        document "Get list of keywords with a given predict." . action $ do
         predict <- param [key|predict|]
         keywords <- runSql $ E.select $
              E.from $ \kw -> do

@@ -31,6 +31,7 @@ import           View.Snippet
 import           Web.Apiary
 import           Web.Apiary.Database.Persist
 import           Web.Apiary.Logger
+import           Text.InterpolatedString.Perl6
 
 snippetWithForm :: (Has SessionExt exts, Has Persist exts,
     Member "author" Text prms, Member "title" Text prms, Member "version" Int prms)
@@ -38,13 +39,13 @@ snippetWithForm :: (Has SessionExt exts, Has Persist exts,
     -> ActionT exts prms IO ()
 snippetWithForm cform = do
     (author, title, version) <- [params|author, title, version|]
-    (runSql $ getBy (UniqueSnippet author title version)) >>= \case
+    (runSql . getBy) (UniqueSnippet author title version) >>= \case
         Just (Entity sid snippet) -> do
             comments <- runSql $ selectList [CommentSnippet ==. sid] [LimitTo 100, Desc CommentMtime]
             requires <- runSql $ selectList [SnippetURIRequires @>. JSON.toJSON (fromSqlKey sid)] [Desc SnippetURITitle]
             u <- getSession'
-            let comments' = (map entityVal comments)
-            let requires' = (map entityVal requires)
+            let comments' = map entityVal comments
+            let requires' = map entityVal requires
             case cform of
                 Just cform' -> lucidRes $
                     snippetPage u cform' comments' requires' snippet
@@ -63,7 +64,7 @@ snippetRouter = do
 
         method GET . action $ snippetWithForm Nothing
 
-        method POST . action $ do
+        method POST . action $
             getSession' >>= \case
                 Just u -> do
                     (cform, comment) <- postForm "comment" commentForm mkFormEnv
@@ -81,9 +82,11 @@ snippetRouter = do
         method GET .
             ([key|author|] =: pText) .
             ([key|title|] =: pText) .
-            ([key|version|] =: pInt) . action $ do
+            ([key|version|] =: pInt) .
+            document "Get snippet json with given author, title and version." . action $ do
                 (author, title, version) <- [params|author, title, version|]
-                (runSql $ getBy (UniqueSnippet author title version)) >>= \case
+                logInfoN $ [qc|Get snippet {author}/{title}/{version}|]
+                (runSql . getBy) (UniqueSnippet author title version) >>= \case
                     Just (Entity sid snippet) -> do
                         runSql $ update sid [SnippetDownload +=. 1]
                         jsonRes $ addIdToSnippetJson sid snippet
@@ -94,10 +97,11 @@ snippetRouter = do
             ([key|password|] =: pText) .
             ([key|title|] =: pText) .
             ([key|version|] =: pInt) .
-            ([key|keywords|] =: pLazyByteString) .
-            ([key|requires|] =: pLazyByteString) .
+            ([key|keywords|] ?? "json array" =: pLazyByteString) .
+            ([key|requires|] ?? "json array" =: pLazyByteString) .
             ([key|language|] =: pText) .
-            ([key|content|] =: pText) . action $ do
+            ([key|content|] =: pText) .
+            document "Publish snippet" . action $ do
 
                 (author, password, title, version, keywords, requires, language, content)
                     <- [params|author, password, title, version, keywords, requires, language, content|]
@@ -109,7 +113,7 @@ snippetRouter = do
                 if validTile title && isJust keywords' && isJust requires'
                     then verifyUser author password >>= \case
                         True -> do
-                            logInfoN "Post snippet"
+                            logInfoN $ [qc|Publish snippet {author}/{title}/{version}|]
                             now <- liftIO getCurrentTime
 
                             let keywords'' = Jsonb $ JSON.toJSON $ fromJust keywords'
@@ -138,7 +142,8 @@ snippetRouter = do
             ([key|author|] =: pText) .
             ([key|password|] =: pText) .
             ([key|title|] =: pText) .
-            ([key|version|] =: pInt) . action $ do
+            ([key|version|] =: pInt) .
+            document "Deprecate snippet" . action $ do
                 (author, password, title, version) <- [params|author, password, title, version|]
                 verifyUser author password >>= \case
                     True -> do
@@ -149,12 +154,14 @@ snippetRouter = do
                             ]
                         if c == 0
                             then status notFound404
-                            else runSql $ updateWhere [
-                                    SnippetAuthor ==. author
-                                ,   SnippetTitle ==. title
-                                ,   SnippetVersion ==. version
-                                ]
-                            [ SnippetDeprecated =. True ]
+                            else do
+                                logInfoN $ [qc|Deprecate snippet {author}/{title}/{version}|]
+                                runSql $ updateWhere [
+                                        SnippetAuthor ==. author
+                                    ,   SnippetTitle ==. title
+                                    ,   SnippetVersion ==. version
+                                    ]
+                                    [ SnippetDeprecated =. True ]
                     False -> status networkAuthenticationRequired511
                 stop
 

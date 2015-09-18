@@ -37,16 +37,16 @@ loginScript :: Text
 loginScript = T.decodeUtf8 $(embedFile "src/Static/dist/login.js")
 
 aceScriptCdnUrl :: Text
-aceScriptCdnUrl = "//cdnjs.cloudflare.com/ajax/libs/ace/1.2.0/ace.min.js"
+aceScriptCdnUrl = "http://cs0.meituan.net/cf/ace/1.2.0/ace.js"
 
 coffeeScriptCdnUrl :: Text
 coffeeScriptCdnUrl = "//coffeescript.org/extras/coffee-script.js"
 
 liveScriptCdnUrl :: Text
-liveScriptCdnUrl = "//livescript.net/livescript-1.4.0-min.js"
+liveScriptCdnUrl = "http://cs0.meituan.net/cf/livescript/1.4.0/livescript-min.js"
 
 marxCssCDNUrl :: Text
-marxCssCDNUrl = "//cdnjs.cloudflare.com/ajax/libs/marx/1.3.0/marx.min.css"
+marxCssCDNUrl = "http://cs0.meituan.net/cf/marx/1.3.0/marx.min.css"
 
 githubCssText :: Text
 githubCssText = T.decodeUtf8 $(embedFile "src/Static/css/markdown.css")

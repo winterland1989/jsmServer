@@ -12,19 +12,21 @@ import           Model
 import           Static
 import           View.Doc
 import           Web.Apiary
-import           Web.Apiary.Database.Persist
-import           Web.Apiary.Logger
-import           Web.Apiary.Session.ClientSession
 
 documentRouter :: Has SessionExt exts => ApiaryT exts '[] IO m ()
-documentRouter = [capture|/doc/docName::Text|] . method GET . action $ do
-    u <- getSession'
-    docName <- param [key|docName|]
-    lucidRes $ docPage u (mkDoc docName)
+documentRouter =
+    [capture|/doc/docName::Text|] . method GET . action $ do
+        docName <- param [key|docName|]
+        u <- getSession'
+        case docName of
+            "cn" -> lucidRes $ docPage u cnDocHtml
 
-  where
-    mkDoc docName = case docName of
-        "cn" -> cnDocHtml
+            "en" -> lucidRes $ docPage u enDocHtml
 
-        _ -> enDocHtml
+            "api" ->
+                defaultDocumentationAction def
+                    {   documentTitle       = "Jsm API documentation"
+                    ,   documentUseCDN      = False
+                    }
 
+            _ -> notFound404Page
