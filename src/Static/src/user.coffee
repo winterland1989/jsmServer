@@ -1,20 +1,14 @@
 require './topBar'
 
 s = require './jsm/base/mss'
+aceMode = require './aceMode'
 
-s.tag
-    '#userDesc_#userList':
-        maxWidth: '960px'
-        margin: '0 auto'
+previews = document.getElementsByClassName 'CodePreview'
 
-    '#userList':
-        CodeInfo:
-            a_span: s.LineSize('2em', '1em')
-                margin: '0 4px'
-                textDecoration: 'none'
-
-            Deprecated: color: '#b48'
-
-            a: s.TextEllip$
-                color: '#b48'
-                width: '100px'
+for preview in previews
+    language = preview.dataset.language
+    editor = ace.edit preview
+    editor.setTheme 'ace/theme/tomorrow'
+    editor.setShowFoldWidgets false
+    editor.renderer.setShowGutter false
+    editor.getSession().setMode aceMode[language]

@@ -44,13 +44,11 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var aceMode, editor, i, language, len, m, preview, previews, s;
+	var aceMode, editor, i, language, len, m, preview, previews;
 
 	__webpack_require__(1);
 
 	m = __webpack_require__(2);
-
-	s = __webpack_require__(4);
 
 	aceMode = __webpack_require__(5);
 
@@ -65,40 +63,6 @@
 	  editor.renderer.setShowGutter(false);
 	  editor.getSession().setMode(aceMode[language]);
 	}
-
-	s.tag({
-	  h1: {
-	    textAlign: 'center'
-	  },
-	  '#latestList_#introduction': {
-	    maxWidth: '960px',
-	    margin: '0 auto'
-	  },
-	  '#latestList': {
-	    ul: {
-	      padding: 0,
-	      listStyleType: 'none'
-	    },
-	    li: {
-	      CodeInfo: s.LineSize('32px', '1em')({
-	        textAlign: 'center',
-	        background: '#000',
-	        color: '#fff',
-	        a: {
-	          textDecoration: 'none',
-	          margin: '0 4px',
-	          color: '#f48'
-	        }
-	      }),
-	      CodePreview: {
-	        height: '150px'
-	      }
-	    },
-	    span: {
-	      margin: '0 4px'
-	    }
-	  }
-	});
 
 
 /***/ },

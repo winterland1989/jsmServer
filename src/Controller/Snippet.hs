@@ -83,7 +83,7 @@ snippetRouter = do
             ([key|author|] =: pText) .
             ([key|title|] =: pText) .
             ([key|version|] =: pInt) .
-            document "Get snippet json with given author, title and version." . action $ do
+            document "Get snippet." . action $ do
                 (author, title, version) <- [params|author, title, version|]
                 logInfoN $ [qc|Get snippet {author}/{title}/{version}|]
                 (runSql . getBy) (UniqueSnippet author title version) >>= \case
@@ -101,7 +101,7 @@ snippetRouter = do
             ([key|requires|] ?? "json array" =: pLazyByteString) .
             ([key|language|] =: pText) .
             ([key|content|] =: pText) .
-            document "Publish snippet" . action $ do
+            document "Publish snippet." . action $ do
 
                 (author, password, title, version, keywords, requires, language, content)
                     <- [params|author, password, title, version, keywords, requires, language, content|]
@@ -143,7 +143,7 @@ snippetRouter = do
             ([key|password|] =: pText) .
             ([key|title|] =: pText) .
             ([key|version|] =: pInt) .
-            document "Deprecate snippet" . action $ do
+            document "Deprecate snippet." . action $ do
                 (author, password, title, version) <- [params|author, password, title, version|]
                 verifyUser author password >>= \case
                     True -> do

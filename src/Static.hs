@@ -48,6 +48,5 @@ liveScriptCdnUrl = "http://cs0.meituan.net/cf/livescript/1.4.0/livescript-min.js
 marxCssCDNUrl :: Text
 marxCssCDNUrl = "http://cs0.meituan.net/cf/marx/1.3.0/marx.min.css"
 
-githubCssText :: Text
-githubCssText = T.decodeUtf8 $(embedFile "src/Static/css/markdown.css")
-
+baseCss :: Text
+baseCss = T.decodeUtf8 $(embedFile "src/Static/css/base.css")

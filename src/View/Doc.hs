@@ -2,8 +2,6 @@
 
 module View.Doc where
 
-import           Control.Monad   (forM_)
-import           Data.Monoid
 import           Data.Text       (Text)
 import           Data.Time.Clock ()
 import           Lucid

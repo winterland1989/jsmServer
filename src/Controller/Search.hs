@@ -47,7 +47,7 @@ searchRouter = method GET $ do
             u <- getSession'
             lucidRes $ searchPage u searchItemPerPage (map entityVal snippets)
 
-    [capture|/keywords|] . ([key|predict|] ?? "Given predict" =: pText) .
+    [capture|/keywords|] . ([key|predict|] =: pText) .
         document "Get list of keywords with a given predict." . action $ do
         predict <- param [key|predict|]
         keywords <- runSql $ E.select $

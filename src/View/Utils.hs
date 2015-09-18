@@ -12,6 +12,7 @@ import           Database.Persist.Postgresql.Json
 import           Lucid
 import           Model
 import           Static
+import  Control.Monad
 
 textShow :: Show a => a -> Text
 textShow = T.pack . show
@@ -28,6 +29,7 @@ pageTitle t = head_ $ do
         link_ [ href_ marxCssCDNUrl , rel_ "stylesheet" , type_ "text/css" ]
         script_ [src_ aceScriptCdnUrl] ("" :: Text)
         script_ "ace.config.set('basePath', '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.0')"
+        style_ baseCss
 
 topBar :: SessionInfo -> Html ()
 topBar u = div_ [id_ "topBar"] $ do
@@ -43,3 +45,27 @@ topBar u = div_ [id_ "topBar"] $ do
                 a_ [class_ "LoginOutBtn", href_ "/logout"] "logout"
             Nothing ->
                 a_ [class_ "LoginBtn", href_ "/login"] "login | register"
+
+
+codePreview :: Snippet -> Html ()
+codePreview
+    (Snippet author title content language version revision deprecated keywords _  _ mtime) = do
+        div_ [class_ "CodeInfo"] $ do
+            a_ [href_ $  "/user/" <> author] $ toHtml author
+            if deprecated
+                then span_ "deprecate"
+                else if revision == 0
+                    then span_ "uploaded"
+                    else span_ "revised"
+            a_ [href_ $  "/snippet/" <> author <> "/" <> title <> "/" <> textShow version] $
+                span_ $ toHtml (title <> textShow version)
+            span_ . toHtml $ "(revision" <> textShow revision <> ")"
+            span_ "@"
+            span_ . toHtml . show $ mtime
+            when deprecated $ span_ [class_ "snippetDeprecated"] "DEPRECATED"
+            span_ [class_ "CodeInfoKeywords"] $ do
+                span_ "keywords:"
+                forM_ (keywordsToList keywords) $ \word -> span_ (toHtml word)
+
+        div_ [class_ "CodePreview", data_ "language" language] . toHtml $
+            (T.unlines . take 8 . T.lines $ content) <> "..."

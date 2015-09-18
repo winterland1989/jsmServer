@@ -44,33 +44,25 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var s;
+	var aceMode, editor, i, language, len, preview, previews, s;
 
 	__webpack_require__(1);
 
 	s = __webpack_require__(4);
 
-	s.tag({
-	  '#userDesc_#userList': {
-	    maxWidth: '960px',
-	    margin: '0 auto'
-	  },
-	  '#userList': {
-	    CodeInfo: {
-	      a_span: s.LineSize('2em', '1em')({
-	        margin: '0 4px',
-	        textDecoration: 'none'
-	      }),
-	      Deprecated: {
-	        color: '#b48'
-	      },
-	      a: s.TextEllip$({
-	        color: '#b48',
-	        width: '100px'
-	      })
-	    }
-	  }
-	});
+	aceMode = __webpack_require__(5);
+
+	previews = document.getElementsByClassName('CodePreview');
+
+	for (i = 0, len = previews.length; i < len; i++) {
+	  preview = previews[i];
+	  language = preview.dataset.language;
+	  editor = ace.edit(preview);
+	  editor.setTheme('ace/theme/tomorrow');
+	  editor.setShowFoldWidgets(false);
+	  editor.renderer.setShowGutter(false);
+	  editor.getSession().setMode(aceMode[language]);
+	}
 
 
 /***/ },
@@ -1959,6 +1951,17 @@
 	}
 
 	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(3)(module)))
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  javascript: 'ace/mode/javascript',
+	  livescript: 'ace/mode/livescript',
+	  coffeescript: 'ace/mode/coffee'
+	};
+
 
 /***/ }
 /******/ ]);
