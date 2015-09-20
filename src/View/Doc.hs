@@ -15,7 +15,7 @@ docPage u doc = doctypehtml_ . html_ $ do
 
     body_ $ do
         topBar u
-        div_ [id_ "document"] $ toHtmlRaw doc
+        div_ [class_ "Content"] $ toHtmlRaw doc
 
         script_ docScript
 

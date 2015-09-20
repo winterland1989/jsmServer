@@ -44,27 +44,13 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var aceMode, currentHref, editor, i, language, len, m, preview, previews, s, searchDesc, searchParams;
+	var currentHref, m, searchDesc, searchParams;
 
 	__webpack_require__(1);
 
+	__webpack_require__(6);
+
 	m = __webpack_require__(2);
-
-	s = __webpack_require__(4);
-
-	aceMode = __webpack_require__(5);
-
-	previews = document.getElementsByClassName('CodePreview');
-
-	for (i = 0, len = previews.length; i < len; i++) {
-	  preview = previews[i];
-	  language = preview.dataset.language;
-	  editor = ace.edit(preview);
-	  editor.setTheme('ace/theme/tomorrow');
-	  editor.setShowFoldWidgets(false);
-	  editor.renderer.setShowGutter(false);
-	  editor.getSession().setMode(aceMode[language]);
-	}
 
 	currentHref = window.location.href;
 
@@ -1975,6 +1961,30 @@
 	  livescript: 'ace/mode/livescript',
 	  coffeescript: 'ace/mode/coffee'
 	};
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var aceMode, editor, i, language, len, preview, previews;
+
+	aceMode = __webpack_require__(5);
+
+	previews = document.getElementsByClassName('CodePreview');
+
+	for (i = 0, len = previews.length; i < len; i++) {
+	  preview = previews[i];
+	  language = preview.dataset.language;
+	  editor = ace.edit(preview);
+	  editor.setTheme('ace/theme/tomorrow');
+	  editor.setShowFoldWidgets(false);
+	  editor.renderer.setShowGutter(false);
+	  editor.getSession().setMode(aceMode[language]);
+	  editor.setOptions({
+	    readOnly: true
+	  });
+	}
 
 
 /***/ }

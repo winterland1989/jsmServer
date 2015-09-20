@@ -1,18 +1,7 @@
 require './topBar'
+require './snippetPreview.coffee'
 
 m = require "./jsm/base/mithril"
-s = require './jsm/base/mss'
-aceMode = require './aceMode'
-
-previews = document.getElementsByClassName 'CodePreview'
-
-for preview in previews
-    language = preview.dataset.language
-    editor = ace.edit preview
-    editor.setTheme 'ace/theme/tomorrow'
-    editor.setShowFoldWidgets false
-    editor.renderer.setShowGutter false
-    editor.getSession().setMode aceMode[language]
 
 currentHref = window.location.href
 searchParams = m.route.parseQueryString(

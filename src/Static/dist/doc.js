@@ -44,20 +44,7 @@
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var m, s;
-
 	__webpack_require__(1);
-
-	m = __webpack_require__(2);
-
-	s = __webpack_require__(4);
-
-	s.tag({
-	  '#document': {
-	    maxWidth: '960px',
-	    margin: '0 auto'
-	  }
-	});
 
 
 /***/ },
