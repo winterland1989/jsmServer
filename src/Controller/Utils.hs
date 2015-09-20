@@ -5,6 +5,7 @@
 
 module Controller.Utils where
 
+import           Control.Monad
 import           Control.Monad.Apiary.Action
 import           Control.Monad.Apiary.Filter.Capture
 import           Crypto.Hash
@@ -13,7 +14,6 @@ import           Data.ByteString                     (ByteString)
 import qualified Data.CaseInsensitive                as CI
 import           Data.Monoid
 import           Data.Text                           (Text)
-import qualified Data.Text                           as T
 import qualified Data.Text.Encoding                  as T
 import           Database.Persist.Postgresql
 import           Lucid
@@ -59,7 +59,7 @@ paramsToEnv ((k, v):rest) p =
 paramsToEnv _ _ = fail "Parameter not found"
 
 mkFormEnv :: FormEncType -> ActionT exts prms IO (Path -> ActionT exts prms IO [FormInput])
-mkFormEnv _ = getReqBodyParams >>= return . paramsToEnv
+mkFormEnv _ = liftM paramsToEnv getReqBodyParams
 
 -- User auth related
 hashPassword :: Text -> ByteString -> Text

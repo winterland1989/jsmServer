@@ -26,7 +26,7 @@ snippetPage u cform comments requires
     (Snippet author title content language version revision deprecated keywords _ download mtime) =
     doctypehtml_ . html_ $ do
         meta_ [charset_ "UTF-8"]
-        pageTitle $ title <> textShow revision
+        pageTitle $ [qc|{author}/{title}{textShow version}@revision{textShow revision}|]
         script_ [src_ liveScriptCdnUrl] ("" :: Text)
         script_ "window.LiveScript = require('LiveScript');"
         script_ [src_ coffeeScriptCdnUrl] ("" :: Text)
@@ -49,11 +49,11 @@ snippetPage u cform comments requires
                         ]
                     p_ "Required by: "
                     ul_ [id_ "snippetRequires"] $
-                        forM_ requires $ \(SnippetURI author title version deprecated _) ->
+                        forM_ requires $ \(SnippetURI author' title' version' deprecated' _) ->
                             li_ $ do
-                                a_ [href_ $ [qc|/snippet/{author}/{title}/{textShow version}|] ]
-                                    (toHtml ([qc|{author}/{title}{textShow version}|] :: Text))
-                                when deprecated $ span_ [class_ "SnippetDeprecated"] "DEPRECATED"
+                                a_ [href_ $ [qc|/snippet/{author'}/{title'}/{textShow version'}|] ]
+                                    (toHtml ([qc|{author'}/{title'}{textShow version'}|] :: Text))
+                                when deprecated' $ span_ [class_ "SnippetDeprecated"] "DEPRECATED"
 
                 div_ [id_ "snippetComment"] $ do
                     case u of
@@ -61,12 +61,12 @@ snippetPage u cform comments requires
                         Nothing -> a_ [href_ "/login"] "Login to discuss"
 
                     ul_ [id_ "commentList"] $
-                        forM_  comments $ \(Comment _ author content mtime) ->
+                        forM_  comments $ \(Comment _ author' content' mtime') ->
                             li_ $ do
                                 p_ [class_ "CommentInfo"] $ do
-                                    a_ [href_ $ "/user/" <> author] $ toHtml author
-                                    span_ . toHtml $ "@" <> textShow mtime
-                                p_ [class_ "CommentContent"] . toHtml $ content
+                                    a_ [href_ $ "/user/" <> author'] $ toHtml author
+                                    span_ . toHtml $ "@" <> textShow mtime'
+                                p_ [class_ "CommentContent"] . toHtml $ content'
 
             script_ snippetScript
 

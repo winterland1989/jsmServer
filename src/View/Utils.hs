@@ -28,7 +28,7 @@ pageTitle t = head_ $ do
         title_ $ toHtml t
         link_ [ href_ marxCssCDNUrl , rel_ "stylesheet" , type_ "text/css" ]
         script_ [src_ aceScriptCdnUrl] ("" :: Text)
-        script_ "ace.config.set('basePath', '//cdnjs.cloudflare.com/ajax/libs/ace/1.2.0')"
+        script_ "ace.config.set('basePath', 'http://cs0.meituan.net/cf/ace/1.2.0')"
         style_ baseCss
 
 topBar :: SessionInfo -> Html ()
